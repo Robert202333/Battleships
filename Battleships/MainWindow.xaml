@@ -1,0 +1,27 @@
+﻿<Window x:Class="Battleships.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:Battleships"
+        mc:Ignorable="d"
+        Title="Battleships" Height="310" Width="437">
+    <Window.DataContext>
+        <local:GameViewModel/>
+    </Window.DataContext>
+
+    <Grid Background="Beige">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="303*"/>
+            <ColumnDefinition Width="124*"/>
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+        </Grid.RowDefinitions>
+        <Canvas x:Name="boardCanvas" Margin="10,10,10,10" Background="DarkTurquoise" SizeChanged="OnSizeChanged"/>
+        <Button x:Name="newGameButton" Content="New Game" Margin="0,10,28,0" VerticalAlignment="Top" HorizontalAlignment="Right" Width="68" Grid.Column="1" Height="20" Command="{Binding StartNewGameCmd}"/>
+        <Button x:Name="settingsButton" Grid.Column="1" Content="Settings" Margin="0,0,27,47" HorizontalAlignment="Right" Width="68" Command="{Binding SettingsCmd}" Height="20" VerticalAlignment="Bottom"/>
+        <Button x:Name="closeButton" Content="Close" Margin="0,0,26,10" Grid.Column="1" HorizontalAlignment="Right" Width="68" Height="20" VerticalAlignment="Bottom" Click="OnClose"/>
+        <TextBox x:Name="shotTextBox" Grid.Column="1" HorizontalAlignment="Right" TextWrapping="Wrap" Text="{Binding ShotCoordinates, UpdateSourceTrigger=PropertyChanged}" VerticalAlignment="Top" Width="68" IsEnabled="{Binding GameActive}" Margin="0,109,27,0"/>
+        <Button x:Name="shotButton" Grid.Column="1" Content="Shot" VerticalAlignment="Top" HorizontalAlignment="Right" Width="68" Height="20" Command="{Binding ShotCmd}" Background="LightGreen" Margin="0,134,27,0"/>
+    </Grid>
+</Window>

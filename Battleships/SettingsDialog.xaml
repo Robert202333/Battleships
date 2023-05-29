@@ -1,0 +1,34 @@
+﻿<Window x:Class="Battleships.SettingsDialog"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:Battleships"
+        mc:Ignorable="d"
+        Title="Settings" Height="471" Width="550">
+    <Window.DataContext>
+        <local:SettingsViewModel />
+    </Window.DataContext>
+    <Window.Resources>
+        <local:CoordinateDescriptionTypeConverter x:Key="CoordinateDescriptionTypeConverter"/>
+    </Window.Resources>
+
+    <Grid Background="Beige" Margin="0,0,0,0">
+        <DataGrid x:Name="shipDescriptionsGrid" Margin="27,205,49,63" ItemsSource="{Binding Settings.ShipDescriptions, Mode=TwoWay}"/>
+
+        <Label x:Name="horizontalSizeLabel" Content="Horizontal size :" HorizontalAlignment="Left" VerticalAlignment="Top"  Margin="27,43,0,0" Height="28" Width="93"/>
+        <Label x:Name="verticalSizeLabel" Content="Vertical size :" HorizontalAlignment="Left" VerticalAlignment="Top"  Margin="42,72,0,0" Height="28" Width="78"/>
+        <TextBox x:Name="horizontalSizeTextBox" HorizontalAlignment="Left" Margin="144,48,0,0" TextWrapping="Wrap" Text="{Binding Settings.HorizontalSize, Mode=TwoWay}" VerticalAlignment="Top" Width="77"/>
+        <TextBox x:Name="verticalSizeTextBox" HorizontalAlignment="Left" Margin="144,77,0,0" TextWrapping="Wrap" Text="{Binding Settings.VerticalSize, Mode=TwoWay}" VerticalAlignment="Top" Width="77"/>
+        <Label x:Name="horizontalIndexTypeLabel" Content="Index type :" HorizontalAlignment="Left" Margin="260,43,0,0" VerticalAlignment="Top" RenderTransformOrigin="0.697,-0.153" Width="80"/>
+        <ComboBox x:Name="horizontalDescriptorTypeComboBox" HorizontalAlignment="Left" Margin="345,46,0,0" VerticalAlignment="Top" Width="120" SelectedIndex="{Binding Settings.HorizontalCoordinateDescriptionType, Converter={StaticResource CoordinateDescriptionTypeConverter}}" ItemsSource="{Binding CoordinateDescriptionTypes}"/>
+        <Label x:Name="verticallIndexTypeLabel" Content="Index type :" HorizontalAlignment="Left" Margin="260,72,0,0" VerticalAlignment="Top" RenderTransformOrigin="0.697,-0.153" Width="80"/>
+        <ComboBox x:Name="verticalDescriptorTypeComboBox" HorizontalAlignment="Left" Margin="345,75,0,0" VerticalAlignment="Top" Width="120" SelectedIndex="{Binding Settings.VerticalCoordinateDescriptionType, Converter={StaticResource CoordinateDescriptionTypeConverter}}" ItemsSource="{Binding CoordinateDescriptionTypes}"/>
+        <CheckBox x:Name="straightShipsCheckBox" Content="Ships are stright (not bent)" HorizontalAlignment="Left" Margin="27,131,0,0" VerticalAlignment="Top" RenderTransformOrigin="-2.021,-0.329" Width="183" IsChecked="{Binding Settings.StrightShips, Mode=TwoWay}"/>
+        <CheckBox x:Name="shipsCanStickCheckBox" Content="Ships can stick each other" HorizontalAlignment="Left" Margin="27,151,0,0" VerticalAlignment="Top" RenderTransformOrigin="-2.021,-0.329" Width="183" IsChecked="{Binding Settings.ShipsCanStick, Mode=TwoWay}"/>
+        <CheckBox x:Name="debugModeCheckBox" Content="Debug mode" HorizontalAlignment="Left" Margin="27,171,0,0" VerticalAlignment="Top" RenderTransformOrigin="-2.021,-0.329" Width="183" IsChecked="{Binding Settings.DebugMode, Mode=TwoWay}"/>
+        <Button x:Name="closeButton" Content="Close" Margin="0,0,22,10" HorizontalAlignment="Right" Width="67" Height="20" VerticalAlignment="Bottom" Click="OnClose"/>
+
+
+    </Grid>
+</Window>

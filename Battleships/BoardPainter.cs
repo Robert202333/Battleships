@@ -1,15 +1,11 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Shapes;
-using Battleships.GameModel;
+using GameModel;
 
-namespace Battleships.GameModel
+namespace Battleships.Painter
 {
     internal enum ShipComponentState
     {
@@ -31,8 +27,8 @@ namespace Battleships.GameModel
         private double squareWidth = 0;
         private double squareHeight = 0;
 
-        private double indexWidth = 0;
-        private double indexHeight = 0;
+        private double coordinateWidth = 0;
+        private double coordinateHeight = 0;
         private double missDotRadius = 0;
 
         internal uint HorizontalSize { get { return horizontalSize; } }
@@ -43,7 +39,7 @@ namespace Battleships.GameModel
 
         internal double MissDotRadius { get { return missDotRadius; } }
 
-        internal double CoordinateSize {  get { return Math.Min(indexWidth, indexHeight) / 2; } }
+        internal double CoordinateSize { get { return Math.Min(coordinateWidth, coordinateHeight) / 2; } }
         internal double Left { get { return margin; } }
         internal double Right { get { return canvasWidth - margin; } }
 
@@ -51,11 +47,11 @@ namespace Battleships.GameModel
         internal double Bottom { get { return canvasHeight - margin; } }
 
 
-        internal double LeftMap {  get { return Left + indexWidth; } }
-        internal double RightMap { get { return Right - indexWidth; } }
+        internal double LeftMap { get { return Left + coordinateWidth; } }
+        internal double RightMap { get { return Right - coordinateWidth; } }
 
-        internal double TopMap { get { return Top + indexHeight; } }
-        internal double BottomMap { get { return Bottom - indexHeight; } }
+        internal double TopMap { get { return Top + coordinateHeight; } }
+        internal double BottomMap { get { return Bottom - coordinateHeight; } }
 
 
         internal CanvasCoordCalculator()
@@ -98,22 +94,22 @@ namespace Battleships.GameModel
             return TopMap + (squareYCoordinate + 0.5) * squareHeight - missDotRadius / 2;
         }
 
-        internal double GetHorizontalIndexCenterX(uint squareXCoordinate)
+        internal double GetHorizontalCoordinateCenterX(uint squareXCoordinate)
         {
             return LeftMap + (squareXCoordinate + 0.35) * squareWidth;
         }
 
-        internal double GetHorizontalIndexCenterY(bool upper)
+        internal double GetHorizontalCoordinateCenterY(bool upper)
         {
-            return upper ? Top + indexHeight * 0.15: Bottom - indexHeight * 0.85;
+            return upper ? Top + coordinateHeight * 0.15 : Bottom - coordinateHeight * 0.85;
         }
 
-        internal double GetVerticalIndexCenterX(bool left)
+        internal double GetVerticalCoordinateCenterX(bool left)
         {
-            return left ? Left + indexWidth / 3 : Right - indexWidth * 0.66;
+            return left ? Left + coordinateWidth / 3 : Right - coordinateWidth * 0.66;
         }
 
-        internal double GetVerticalIndexCenterY(uint squareYCoordinate)
+        internal double GetVerticalCoordinateCenterY(uint squareYCoordinate)
         {
             return TopMap + (squareYCoordinate + 0.15) * squareHeight;
         }
@@ -123,21 +119,21 @@ namespace Battleships.GameModel
         {
             // Assumed that rect for coordinate display is the same size as for square
 
-            squareWidth = (canvasWidth - 2 * margin) / (horizontalSize + 2); // Indexes included
-            squareHeight = (canvasHeight - 2 * margin) / (verticalSize + 2); // Indexes included
+            squareWidth = (canvasWidth - 2 * margin) / (horizontalSize + 2); // Coordinatess included
+            squareHeight = (canvasHeight - 2 * margin) / (verticalSize + 2); // Coordinates included
 
-            indexWidth = squareWidth;
-            indexHeight = squareHeight;
+            coordinateWidth = squareWidth;
+            coordinateHeight = squareHeight;
             missDotRadius = Math.Min(squareWidth, squareHeight) / 2;
         }
     }
 
-    public class BoardPainter
+    public class BoardPainter : IBoardPainter
     {
         private readonly Canvas canvas;
         private readonly CanvasCoordCalculator ccc = new();
 
-        static private SolidColorBrush IndexDescriptionBrush = Brushes.Black;
+        static private SolidColorBrush CoordinateDescriptionBrush = Brushes.Black;
         static private SolidColorBrush MissedBrush = Brushes.White;
         static private SolidColorBrush LineBrush = Brushes.Black;
         static private SolidColorBrush HitShipComponentBrush = Brushes.Yellow;
@@ -159,38 +155,52 @@ namespace Battleships.GameModel
             ccc.OnResetSettings(horizontalSize, verticalSize);
         }
 
-        internal void Clear()
+        public void PaintShotResult(Tuple<Coordinates, ShotResult, ShipComponent?> shotResult, Game game, bool debugMode)
+        {
+            var (coordinates, result, component) = shotResult;
+
+            if (result == ShotResult.Miss)
+            {
+                PaintMissDot(coordinates.X, coordinates.Y);
+                return;
+            }
+
+            if ((result & ShotResult.ShipSunk) != 0)
+                PaintSunkShip(component!.Ship);
+            else
+                PaintShipComponent(component!, ShipComponentState.Hit);
+        }
+
+        public void Clear()
         {
             canvas.Children.Clear();
         }
 
-        internal void PaintAll(Board board, bool debugMode)
+        public void PaintAll(Game game, bool debugMode)
         {
             Clear();
 
-            PaintCoordinatesDescriptions(board);
+            PaintCoordinatesDescriptions(game.Board);
             PaintLines();
             if (debugMode)
-                PaintDebugShipComponents(board);
-            PaintHitShipComponents(board);
-            PaintMissDots(board);
+                PaintDebugShipComponents(game.Board);
+            PaintHitShipComponents(game.Board);
+            PaintMissDots(game.Board);
         }
 
-        internal void PaintSunkShip(Ship ship)
+        private void PaintSunkShip(Ship ship)
         {
-            ship.Components.Select(component => component.Coordinates).ToList().ForEach(coordinates =>
-            {
-                PaintShipComponent(coordinates.X, coordinates.Y, ShipComponentState.Sunk);
-            });
+            foreach (var component in ship.Components)
+                PaintShipComponent(component, ShipComponentState.Sunk);
         }
 
 
-        internal void PaintShipComponent(uint x, uint y, ShipComponentState state)
+        private void PaintShipComponent(ShipComponent component, ShipComponentState state)
         {
-            PaintShipComponent(x, y, GetShipComponentBrush(state));
+            PaintShipComponent(component.Coordinates.X, component.Coordinates.Y, GetShipComponentBrush(state));
         }
 
-        internal void PaintMissDot(uint xCoor, uint yCoor)
+        private void PaintMissDot(uint xCoor, uint yCoor)
         {
             double x = ccc.GetMissDotCenterX(xCoor);
             double y = ccc.GetMissDotCenterY(yCoor);
@@ -210,22 +220,22 @@ namespace Battleships.GameModel
         private void PaintCoordinatesDescriptions(Board board)
         {
             var textSize = ccc.CoordinateSize;
-            var upperHorizontalIndexCenterY = ccc.GetHorizontalIndexCenterY(true);
-            var lowerHorizontalIndexCenterY = ccc.GetHorizontalIndexCenterY(false);
-            for (ushort  i = 0; i < board.HorizontalDescriptor.Size; i++)
+            var upperHorizontalCoordinateCenterY = ccc.GetHorizontalCoordinateCenterY(true);
+            var lowerHorizontalCoordinateCenterY = ccc.GetHorizontalCoordinateCenterY(false);
+            for (ushort i = 0; i < board.HorizontalDescriptor.Size; i++)
             {
-                string indexDescription = board.HorizontalDescriptor.GetDescription(i);
-                PaintText(ccc.GetHorizontalIndexCenterX(i), upperHorizontalIndexCenterY, textSize, indexDescription);
-                PaintText(ccc.GetHorizontalIndexCenterX(i), lowerHorizontalIndexCenterY, textSize, indexDescription);
+                string coordinateDescription = board.HorizontalDescriptor.GetDescription(i);
+                PaintText(ccc.GetHorizontalCoordinateCenterX(i), upperHorizontalCoordinateCenterY, textSize, coordinateDescription);
+                PaintText(ccc.GetHorizontalCoordinateCenterX(i), lowerHorizontalCoordinateCenterY, textSize, coordinateDescription);
             }
 
-            var leftVerticalIndexCenterY = ccc.GetVerticalIndexCenterX(true);
-            var righttVerticalIndexCenterY = ccc.GetVerticalIndexCenterX(false);
-            for (ushort  i = 0; i < board.VerticalDescriptior.Size; i++)
+            var leftVerticalCoordinateCenterY = ccc.GetVerticalCoordinateCenterX(true);
+            var righttVerticalCoordinateCenterY = ccc.GetVerticalCoordinateCenterX(false);
+            for (ushort i = 0; i < board.VerticalDescriptor.Size; i++)
             {
-                string indexDescription = board.VerticalDescriptior.GetDescription(i);
-                PaintText(leftVerticalIndexCenterY, ccc.GetVerticalIndexCenterY(i), textSize, indexDescription);
-                PaintText(righttVerticalIndexCenterY, ccc.GetVerticalIndexCenterY(i), textSize, indexDescription);
+                string coordinateDescription = board.VerticalDescriptor.GetDescription(i);
+                PaintText(leftVerticalCoordinateCenterY, ccc.GetVerticalCoordinateCenterY(i), textSize, coordinateDescription);
+                PaintText(righttVerticalCoordinateCenterY, ccc.GetVerticalCoordinateCenterY(i), textSize, coordinateDescription);
             }
         }
 
@@ -240,11 +250,17 @@ namespace Battleships.GameModel
 
         private void PaintDebugShipComponents(Board board)
         {
-            board.VisitSquares((square, x, y) =>
+            static bool isShipComponent(Square square)
             {
-                if (square.ShipComponenrt != null)
-                    PaintShipComponent(x, y, ShipComponentState.Debug);
-            });
+                return square.ShipComponent != null;
+            }
+
+            void paintDebugShipComponent(Square square, uint x, uint y)
+            {
+                PaintShipComponent(square.ShipComponent!, ShipComponentState.Debug);
+            }
+
+            board.VisitSquares(paintDebugShipComponent, isShipComponent);
         }
 
         private SolidColorBrush GetShipComponentBrush(ShipComponentState state)
@@ -259,27 +275,27 @@ namespace Battleships.GameModel
         }
         private void PaintHitShipComponents(Board board)
         {
-            var paint = (Square square, uint x, uint y) =>
+            void paint(Square square, uint x, uint y)
             {
-                PaintShipComponent(x, y, square.ShipComponenrt!.Ship.IsSunk ? ShipComponentState.Sunk : ShipComponentState.Hit);
+                PaintShipComponent(square.ShipComponent!, square.ShipComponent!.Ship.IsSunk ? ShipComponentState.Sunk : ShipComponentState.Hit);
             };
 
-            Predicate<Square> predicate = (Square square) =>
+            static bool hasHitShipComponent(Square square)
             {
-                return (square.ShipComponenrt != null && square.ShipComponenrt.WasHit);
+                return square.ShipComponent != null && square.ShipComponent.WasHit;
             };
 
-            board.VisitSquares(paint, predicate);
+            board.VisitSquares(paint, hasHitShipComponent);
         }
 
         private void PaintMissDots(Board board)
         {
-            Predicate<Square> missedShotSquarePredicate = (Square square) =>
+            static bool hasMissedShot(Square square)
             {
-                return square.WasHit && square.ShipComponenrt == null;
-            };
+                return square.WasHit && square.ShipComponent == null;
+            }
 
-            board.VisitSquares((square, x, y) => PaintMissDot(x, y), missedShotSquarePredicate);
+            board.VisitSquares((square, x, y) => PaintMissDot(x, y), hasMissedShot);
         }
 
         private void PaintLine(double x1, double y1, double x2, double y2)
@@ -301,7 +317,7 @@ namespace Battleships.GameModel
             textBlock.Width = height * 2;
             textBlock.Height = height * 2;
             textBlock.FontSize = height;
-            textBlock.Foreground = IndexDescriptionBrush;
+            textBlock.Foreground = CoordinateDescriptionBrush;
             textBlock.VerticalAlignment = VerticalAlignment.Center;
             textBlock.HorizontalAlignment = HorizontalAlignment.Center;
             textBlock.SetValue(Canvas.LeftProperty, x);

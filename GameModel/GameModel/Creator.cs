@@ -1,80 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
+﻿using System.Diagnostics;
 
-namespace Battleships.GameModel
+
+namespace GameModel
 {
-    internal enum Direction
-    {
-        Up,
-        Right,
-        Down,
-        Left
-    };
-
-    internal struct Coordinates
-    {
-        internal uint X { get; set; }
-        internal uint Y { get; set; }
-
-        internal Coordinates(uint x, uint y)
-        {
-            X = x;
-            Y = y;
-        }
-
-        internal Coordinates GetUp()
-        {
-            return new Coordinates(X, Y - 1);
-        }
-
-        internal Coordinates GetDown()
-        {
-            return new Coordinates(X, Y + 1);
-        }
-
-        internal Coordinates GetRight()
-        {
-            return new Coordinates(X + 1, Y);
-        }
-
-        internal Coordinates GetLeft()
-        {
-            return new Coordinates(X - 1, Y);
-        }
-
-        internal Coordinates GetInDirection(Direction direction)
-        {
-            return direction switch
-            {
-                Direction.Up => GetUp(),
-                Direction.Right => GetRight(),
-                Direction.Down => GetDown(),
-                Direction.Left => GetLeft(),
-                _ => throw new NotImplementedException()
-            };
-        }
-
-        internal Direction? GetDirection(Coordinates coordinates)
-        {
-            if (Math.Abs((int)X - coordinates.X) + Math.Abs((int)Y - coordinates.Y) != 1)
-                return null;
-            if (X < coordinates.X)
-                return Direction.Right;
-            else if(Y < coordinates.Y)
-                return Direction.Down;
-            if (X > coordinates.X)
-                return Direction.Left;
-            else // (Y > coordinates.Y)
-                return Direction.Up;
-        }
-
-    }
-
     internal class CoordinatesChain
     {
         public List<Coordinates> Chain { get; } = new List<Coordinates>();
@@ -119,10 +47,10 @@ namespace Battleships.GameModel
             return (Direction)random.Next(4);
         }
 
-        internal static Func<CoordinatesChain, Predicate<Coordinates>, bool> Bent = 
-            (CoordinatesChain coordinatesChain, Predicate<Coordinates> coordinatesValidator) =>
+        internal static Func<CoordinatesChain, Predicate<Coordinates>, bool> Bent =
+            (coordinatesChain, coordinatesValidator) =>
         {
-            bool isDirectionValid (Direction direction)
+            bool isDirectionValid(Direction direction)
             {
                 var nextCoordinates = coordinatesChain.Last.GetInDirection(direction);
                 return coordinatesValidator(nextCoordinates) && !coordinatesChain.Occupies(nextCoordinates);
@@ -140,8 +68,8 @@ namespace Battleships.GameModel
             return true;
         };
 
-        internal static Func<CoordinatesChain, Predicate<Coordinates>, bool> Straight = 
-            (CoordinatesChain coordinatesChain, Predicate<Coordinates> coordinatesValidator) =>
+        internal static Func<CoordinatesChain, Predicate<Coordinates>, bool> Straight =
+            (coordinatesChain, coordinatesValidator) =>
         {
             var direction = coordinatesChain.GetLastDirection() ?? GetRandomDirection();
             var nextCoordinations = coordinatesChain.Last.GetInDirection(direction);
@@ -149,8 +77,8 @@ namespace Battleships.GameModel
             if (!coordinatesValidator(nextCoordinations))
                 return false;
 
-             coordinatesChain.Add(nextCoordinations);
-             return true;
+            coordinatesChain.Add(nextCoordinations);
+            return true;
         };
     }
 
@@ -172,19 +100,19 @@ namespace Battleships.GameModel
 
         internal ShipCreator(Settings settings)
         {
-            this.settings = settings;            
+            this.settings = settings;
         }
 
 
 
-        internal List<Ship> CreateShips()
+        internal List<Ship> ExecuteCreateShips()
         {
             bool debugCreationMode = false;
             if (debugCreationMode)
             {
                 // No multithred approach
                 CancelSource = new CancellationTokenSource();
-                return CreateShipsInThread();
+                return CreateShips();
             }
             else
             {
@@ -193,7 +121,7 @@ namespace Battleships.GameModel
 
                 List<Task<List<Ship>>> tasks = new List<Task<List<Ship>>>();
                 for (int i = 0; i < CreateShipTaskNum; i++)
-                    tasks.Add(new Task<List<Ship>>(() => CreateShipsInThread()));
+                    tasks.Add(new Task<List<Ship>>(() => CreateShips()));
 
                 tasks.ForEach(task => task.Start());
 
@@ -207,7 +135,7 @@ namespace Battleships.GameModel
             }
         }
 
-        private List<Ship> CreateShipsInThread()
+        private List<Ship> CreateShips()
         {
             try
             {
@@ -238,7 +166,7 @@ namespace Battleships.GameModel
 
         private Ship CreateShip(string name, uint size)
         {
-            while(true)
+            while (true)
             {
                 CancelSource!.Token.ThrowIfCancellationRequested();
 
@@ -348,13 +276,15 @@ namespace Battleships.GameModel
         }
     }
 
-    public static class GameCreator
+    public class DefaultGameCreator : IGameCreator
     {
-        public static Game Create(Settings config, BoardPainter boardPainter)
-        {
-            var ships = CreateShips(config);
+        public DefaultGameCreator() {}
 
-            var board = CreateBoard(config);
+        public Game Create(Settings settings)
+        {
+            var ships = CreateShips(settings);
+
+            var board = CreateBoard(settings);
 
             board.ApplyShipComponents(ships.Aggregate(new List<ShipComponent>(), (componentList, ship) =>
             {
@@ -362,31 +292,31 @@ namespace Battleships.GameModel
                 return componentList;
             }));
 
-            return new Game(board, ships, boardPainter);
+            return new Game(board, ships);
         }
 
-        private static Board CreateBoard(Settings config)
+        private static Board CreateBoard(Settings settings)
         {
-            static string GenerateDescription(ushort index, CoordinateDescriptionType indexDescrType)
+            static string GenerateDescription(ushort coordinate, CoordinateDescriptionType coordinateDescriptionType)
             {
-                return indexDescrType == CoordinateDescriptionType.Number ?
-                    (index + 1).ToString() :
-                    ((char)('A' + index)).ToString();
+                return coordinateDescriptionType == CoordinateDescriptionType.Number ?
+                    (coordinate + 1).ToString() :
+                    ((char)('A' + coordinate)).ToString();
             }
 
-            var horizontalDescriptions = Enumerable.Range(0, (int)config.HorizontalSize).
-                Select((number) => GenerateDescription((ushort)number, config.HorizontalCoordinateDescriptionType));
+            var horizontalDescriptions = Enumerable.Range(0, (int)settings.HorizontalSize).
+                Select((number) => GenerateDescription((ushort)number, settings.HorizontalCoordinateDescriptionType));
 
-            var verticallDescriptions = Enumerable.Range(0, (int)config.VerticalSize).
-                Select((number) => GenerateDescription((ushort)number, config.VerticalCoordinateDescriptionType));
+            var verticallDescriptions = Enumerable.Range(0, (int)settings.VerticalSize).
+                Select((number) => GenerateDescription((ushort)number, settings.VerticalCoordinateDescriptionType));
 
             return new Board(new CoordinateDescriptor(horizontalDescriptions), new CoordinateDescriptor(verticallDescriptions));
         }
 
-        private static List<Ship> CreateShips(Settings config)
+        private static List<Ship> CreateShips(Settings settings)
         {
-            ShipCreator shipSetter = new ShipCreator(config);
-            return shipSetter.CreateShips();
+            ShipCreator shipSetter = new ShipCreator(settings);
+            return shipSetter.ExecuteCreateShips();
         }
     }
 }

@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Battleships.GameModel
+namespace GameModel
 {
     public class RepeatedHitException : Exception
     {
@@ -21,9 +21,9 @@ namespace Battleships.GameModel
         }
     }
 
-    public class InvalidIndexDescriptionException : Exception
+    public class InvalidCoordinatesDescriptionException : Exception
     {        
-        public InvalidIndexDescriptionException(string message) : base(message)
+        public InvalidCoordinatesDescriptionException(string message) : base(message)
         {
         }
     }

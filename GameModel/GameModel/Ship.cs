@@ -4,14 +4,14 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Battleships.GameModel
+namespace GameModel
 {
 
-    internal class ShipComponent
+    public class ShipComponent
     {
-        internal bool WasHit { get; set; } = false;
-        internal Ship Ship { get; init; }
-        internal Coordinates Coordinates{ get; init;}
+        public bool WasHit { get; set; } = false;
+        public Ship Ship { get; init; }
+        public Coordinates Coordinates{ get; init;}
 
         internal ShipComponent(Ship ship, Coordinates coordinates)
         {
@@ -23,7 +23,7 @@ namespace Battleships.GameModel
 
     public class Ship
     {
-        internal ShipComponent[] Components { get; init; }
+        public ShipComponent[] Components { get; init; }
 
         public string Name { get; init; }
 

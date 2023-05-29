@@ -23,7 +23,7 @@ namespace Battleships
         public MainWindow()
         {
             InitializeComponent();
-            (DataContext as GameViewModel)!.SetCanvas(boardCanvas);
+            (DataContext as GameViewModel)!.SetCanvas(boardCanvas);            
         }
 
         private void OnClose(object sender, RoutedEventArgs e)
@@ -34,6 +34,11 @@ namespace Battleships
         private void OnSizeChanged(object sender, SizeChangedEventArgs e)
         {
             (DataContext as GameViewModel)!.OnCanvasResize();
+        }
+
+        private void OnLoaded(object sender, RoutedEventArgs e)
+        {
+            (DataContext as GameViewModel)!.StartNewGame();
         }
     }
 }

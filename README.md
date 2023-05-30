@@ -6,12 +6,12 @@ Solution consist of 3 projects:
 - GameModel
 
 GameModel delivers game engine but is separated from the UI tier.
-WPF and Console applications provide implmented interfaces responsible for displaying board and interaction with user.
+WPF and Console applications provide implemented interfaces responsible for displaying board and interaction with user.
 WPF version provides also possibility to edit game configuration like number and size of ships, map size and ships creation rules.
 'Debug Mode' option shows all created ships grayed, allowing to check if game is working correctly. 
 
 As user (in WPF version) may set his own rules, it may happen that ships placement on map may be difficult or impossible.
-Ship creation is done by running parallel tasks. Result is taken from the first fineshed one. If no task is finished in 6 seconds all tasks are interrupted.
+Ship creation is done by running parallel tasks. Result is taken from the first finished one. If no task is finished in 6 seconds all tasks are interrupted.
 
 GameModel library allows to customize ship placement algorithm (by deriving from GameCreator abstract class), however WPF and Console applications use  
 DefaultGameCreator class provided by GameModel library.

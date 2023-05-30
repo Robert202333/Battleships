@@ -9,33 +9,38 @@ namespace GameModel
 
     public class ShipComponent
     {
-        public bool WasHit { get; set; } = false;
+        public bool WasHit { get; internal set; } = false;
         public Ship Ship { get; init; }
-        public Coordinates Coordinates{ get; init;}
+        public Square Square { get; init; }
 
-        internal ShipComponent(Ship ship, Coordinates coordinates)
+        internal ShipComponent(Ship ship, Square square)
         {
             Ship = ship;
-            Coordinates = coordinates;
+            Square = square;
         }
+
     }
 
 
     public class Ship
     {
-        public ShipComponent[] Components { get; init; }
+        public ShipComponent[] Components { get; private set; } = { };
 
         public string Name { get; init; }
 
-        public bool IsSunk
+        public bool WassSunk
         {
             get { return Components.All(component => component.WasHit); }
         }
 
-        internal Ship(string name, IEnumerable<Coordinates> coordinates)
+        internal Ship(string name)
         {
-            Name = name;
-            Components = coordinates.Select(coor => new ShipComponent(this, coor)).ToArray();
+            Name = name;            
+        }
+
+        internal void AddComponents(IEnumerable<ShipComponent> components)
+        {
+            Components = components.ToArray();
         }
     }
 }

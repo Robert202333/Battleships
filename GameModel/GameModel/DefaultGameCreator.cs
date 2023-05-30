@@ -3,41 +3,6 @@
 
 namespace GameModel
 {
-    internal class CoordinatesChain
-    {
-        public List<Coordinates> Chain { get; } = new List<Coordinates>();
-
-        internal CoordinatesChain()
-        {
-
-        }
-
-        internal void Add(Coordinates coordinates)
-        {
-            Chain.Add(coordinates);
-        }
-
-        internal bool Occupies(Coordinates coordinates)
-        {
-            return Chain.Any(coord => coord.Equals(coordinates));
-        }
-
-        internal Coordinates Last
-        {
-            get
-            {
-                return Chain.LastOrDefault();
-            }
-        }
-
-        internal Direction? GetLastDirection()
-        {
-            if (Chain.Count < 2)
-                return null;
-            return Chain[Chain.Count - 2].GetDirection(Last);
-        }
-    }
-
     static internal class ComponentCreationStrategies
     {
         private static Random random = new Random();
@@ -83,7 +48,7 @@ namespace GameModel
     }
 
 
-    internal class ShipCreator
+    internal class CoordinatesChainsCreator
     {
         private const int CreateShipTaskNum = 4;
         private const int CreationMaxTime = 6; // seconds
@@ -96,32 +61,32 @@ namespace GameModel
         private uint HorizontalSize { get { return settings.HorizontalSize; } }
         private uint VerticalSize { get { return settings.VerticalSize; } }
 
-        Settings settings;
+        private readonly Settings settings;
 
-        internal ShipCreator(Settings settings)
+        internal CoordinatesChainsCreator(Settings settings)
         {
             this.settings = settings;
         }
 
 
 
-        internal List<Ship> ExecuteCreateShips()
+        internal List<Tuple<CoordinatesChain, ShipDescription>> ExecuteCreateCoordinatesChains()
         {
             bool debugCreationMode = false;
             if (debugCreationMode)
             {
                 // No multithred approach
                 CancelSource = new CancellationTokenSource();
-                return CreateShips();
+                return CreateCoordinatesChains();
             }
             else
             {
                 CancelSource = new CancellationTokenSource();
                 CancelSource.CancelAfter(CreationMaxTime * 1000);
 
-                List<Task<List<Ship>>> tasks = new List<Task<List<Ship>>>();
+                List<Task<List<Tuple<CoordinatesChain, ShipDescription>>>> tasks = new ();
                 for (int i = 0; i < CreateShipTaskNum; i++)
-                    tasks.Add(new Task<List<Ship>>(() => CreateShips()));
+                    tasks.Add(new (() => CreateCoordinatesChains()));
 
                 tasks.ForEach(task => task.Start());
 
@@ -135,12 +100,12 @@ namespace GameModel
             }
         }
 
-        private List<Ship> CreateShips()
+        private List<Tuple<CoordinatesChain, ShipDescription>> CreateCoordinatesChains()
         {
             try
             {
                 InitSquares();
-                List<Ship> ships = new List<Ship>();
+                List<Tuple<CoordinatesChain, ShipDescription>> coordinatesChains = new ();
 
                 settings.ShipDescriptions.ForEach(shipDescription =>
                 {
@@ -148,33 +113,33 @@ namespace GameModel
                     {
                         CancelSource!.Token.ThrowIfCancellationRequested();
 
-                        ships.Add(CreateShip(shipDescription.Name, shipDescription.Size));
+                        coordinatesChains.Add(Tuple.Create(CreateCoordinatesChain(shipDescription.Size), shipDescription));
                     }
                 });
-                return ships;
+                return coordinatesChains;
             }
             catch (OperationCanceledException)
             {
-                return new List<Ship>();
+                return new ();
             }
             catch (Exception e)
             {
                 Debug.WriteLine(e.Message);
-                return new List<Ship>();
+                return new ();
             }
         }
 
-        private Ship CreateShip(string name, uint size)
+        private CoordinatesChain CreateCoordinatesChain(uint size)
         {
             while (true)
             {
                 CancelSource!.Token.ThrowIfCancellationRequested();
 
-                Ship? ship = TryCreateShip(name, size,
+                CoordinatesChain? coordinateChain = TryCreateCoordinatesChain(size,
                     settings.StrightShips ? ComponentCreationStrategies.Straight : ComponentCreationStrategies.Bent);
 
-                if (ship != null)
-                    return ship;
+                if (coordinateChain != null)
+                    return coordinateChain;
             }
         }
 
@@ -192,19 +157,19 @@ namespace GameModel
             return AreCoordinatesValid(coor) && IsSquareAvailable(coor);
         }
 
-        private Ship? TryCreateShip(string name, uint size, Func<CoordinatesChain, Predicate<Coordinates>, bool> addComponent)
+        private CoordinatesChain? TryCreateCoordinatesChain(uint size, Func<CoordinatesChain, Predicate<Coordinates>, bool> addComponent)
         {
-            CoordinatesChain squareChain = new CoordinatesChain();
-            squareChain.Add(GetRandomSquare());
+            CoordinatesChain coordinatesChain = new CoordinatesChain();
+            coordinatesChain.Add(GetRandomSquare());
 
             for (int i = 1; i < size; i++)
             {
-                if (!addComponent(squareChain, IsSquareAllowed))
+                if (!addComponent(coordinatesChain, IsSquareAllowed))
                     return null;
             }
 
-            squareChain.Chain.ForEach(SetShipSquareUnavailable);
-            return new Ship(name, squareChain.Chain);
+            coordinatesChain.Chain.ForEach(SetShipSquareUnavailable);
+            return coordinatesChain;
         }
 
         private void SetShipSquareUnavailable(Coordinates coor)
@@ -276,47 +241,27 @@ namespace GameModel
         }
     }
 
-    public class DefaultGameCreator : IGameCreator
+    public class DefaultGameCreator : GameCreator
     {
         public DefaultGameCreator() {}
 
-        public Game Create(Settings settings)
+
+
+        protected override IEnumerable<Ship> CreateShips(Board board, Settings settings)
         {
-            var ships = CreateShips(settings);
+            var coordinatesChains = CreateCoordinatesChains(settings);
 
-            var board = CreateBoard(settings);
-
-            board.ApplyShipComponents(ships.Aggregate(new List<ShipComponent>(), (componentList, ship) =>
+            return coordinatesChains.Select(coordinateChain =>
             {
-                componentList.AddRange(ship.Components);
-                return componentList;
-            }));
-
-            return new Game(board, ships);
+                var (chain, shipDescription) = coordinateChain;
+                return CreateShip(shipDescription.Name, chain.Chain, board);
+            });
         }
 
-        private static Board CreateBoard(Settings settings)
+        private static List<Tuple<CoordinatesChain, ShipDescription>> CreateCoordinatesChains(Settings settings)
         {
-            static string GenerateDescription(ushort coordinate, CoordinateDescriptionType coordinateDescriptionType)
-            {
-                return coordinateDescriptionType == CoordinateDescriptionType.Number ?
-                    (coordinate + 1).ToString() :
-                    ((char)('A' + coordinate)).ToString();
-            }
-
-            var horizontalDescriptions = Enumerable.Range(0, (int)settings.HorizontalSize).
-                Select((number) => GenerateDescription((ushort)number, settings.HorizontalCoordinateDescriptionType));
-
-            var verticallDescriptions = Enumerable.Range(0, (int)settings.VerticalSize).
-                Select((number) => GenerateDescription((ushort)number, settings.VerticalCoordinateDescriptionType));
-
-            return new Board(new CoordinateDescriptor(horizontalDescriptions), new CoordinateDescriptor(verticallDescriptions));
-        }
-
-        private static List<Ship> CreateShips(Settings settings)
-        {
-            ShipCreator shipSetter = new ShipCreator(settings);
-            return shipSetter.ExecuteCreateShips();
+            CoordinatesChainsCreator ccCraetor = new CoordinatesChainsCreator(settings);
+            return ccCraetor.ExecuteCreateCoordinatesChains();
         }
     }
 }

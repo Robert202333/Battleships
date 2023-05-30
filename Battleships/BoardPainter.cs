@@ -197,7 +197,7 @@ namespace Battleships.Painter
 
         private void PaintShipComponent(ShipComponent component, ShipComponentState state)
         {
-            PaintShipComponent(component.Coordinates.X, component.Coordinates.Y, GetShipComponentBrush(state));
+            PaintShipComponent(component.Square.Coordinates.X, component.Square.Coordinates.Y, GetShipComponentBrush(state));
         }
 
         private void PaintMissDot(uint xCoor, uint yCoor)
@@ -277,7 +277,7 @@ namespace Battleships.Painter
         {
             void paint(Square square, uint x, uint y)
             {
-                PaintShipComponent(square.ShipComponent!, square.ShipComponent!.Ship.IsSunk ? ShipComponentState.Sunk : ShipComponentState.Hit);
+                PaintShipComponent(square.ShipComponent!, square.ShipComponent!.Ship.WassSunk ? ShipComponentState.Sunk : ShipComponentState.Hit);
             };
 
             static bool hasHitShipComponent(Square square)

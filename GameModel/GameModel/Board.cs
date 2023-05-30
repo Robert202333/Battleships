@@ -47,11 +47,13 @@
 
     public class Square
     {
-        public ShipComponent? ShipComponent { get; set; } = null;
-        public bool WasHit { get; set; } = false;
+        public ShipComponent? ShipComponent { get; internal set; } = null;
+        public bool WasHit { get; internal set; } = false;
+        public Coordinates Coordinates{ get; init; }
 
-        internal Square()
+        internal Square(Coordinates coordinates)
         {
+            Coordinates = coordinates;
         }
     }
 
@@ -72,9 +74,9 @@
             HorizontalDescriptor = horizontalDescriptor;
 
             squares = new Square[VerticalDescriptor.Size, HorizontalDescriptor.Size];
-            for (int y = 0; y < squares.GetLength(0); y++)
-                for (int x = 0; x < squares.GetLength(1); x++)
-                    squares[y, x] = new Square();
+            for (uint y = 0; y < squares.GetLength(0); y++)
+                for (uint x = 0; x < squares.GetLength(1); x++)
+                    squares[y, x] = new Square(new Coordinates(x, y));
         }
 
         internal Coordinates ConvertToCoordinates(string xDescription, string yDescription)
@@ -102,7 +104,7 @@
         {
             foreach(var component in components)
             {
-                var coordinates = component.Coordinates;
+                var coordinates = component.Square.Coordinates;
                 var square = GetSquare(coordinates.X, coordinates.Y);
                 square.ShipComponent = component;
             }

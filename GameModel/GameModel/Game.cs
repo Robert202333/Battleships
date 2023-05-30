@@ -28,7 +28,7 @@ namespace GameModel
 
 
 
-        public Tuple<Coordinates, ShotResult, ShipComponent?> ProcessShot(string xDescr, string yDescr)
+        internal Tuple<Coordinates, ShotResult, ShipComponent?> ProcessShot(string xDescr, string yDescr)
         {
             var coordinates = Board.ConvertToCoordinates(xDescr, yDescr);
             var shipComponent = Board.ProcessShot(coordinates.X, coordinates.Y);
@@ -38,19 +38,19 @@ namespace GameModel
 
             ShotResult shotResult = ShotResult.Hit;
 
-            if (shipComponent.Ship.IsSunk)
+            if (shipComponent.Ship.WassSunk)
                 shotResult |= ShotResult.ShipSunk;
 
-            if (AllShipsAreSunk())
+            if (AllShipsWereSunk())
                 shotResult |= ShotResult.GameEnd;
 
             return new Tuple<Coordinates, ShotResult, ShipComponent?>(coordinates, shotResult, shipComponent);
         }
 
 
-        private bool AllShipsAreSunk()
+        private bool AllShipsWereSunk()
         {
-            return Ships.All(ship => ship.IsSunk);
+            return Ships.All(ship => ship.WassSunk);
         }
     }
 }

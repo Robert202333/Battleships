@@ -31,10 +31,10 @@ internal class ConsoleGame
         {
             Console.WriteLine();
             Console.Write(CreatePrompt());
-            string? read = Console.ReadLine();
-            string input = read != null ? read.ToUpper().Trim() : "";
+            string? input = Console.ReadLine();
+            string upperInput = input != null ? input.ToUpper().Trim() : "";
 
-            switch (input)
+            switch (upperInput)
             {
                 case exitCmd:
                     OnExit();
@@ -45,7 +45,7 @@ internal class ConsoleGame
                     break;
 
                 default:
-                    OnCoordinates(input);
+                    OnCoordinates(upperInput);
                     break;
             }
         }
@@ -66,7 +66,6 @@ internal class ConsoleGame
     {
         Console.WriteLine();
         Console.WriteLine(newGameMessage);
-        Console.WriteLine();
         gameEnv.Restart();
     }
 

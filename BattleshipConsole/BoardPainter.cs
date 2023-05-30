@@ -54,21 +54,12 @@ public class BoardPainter : IBoardPainter
 
     private void PaintSquare(Square square)
     {
-        var mark = emptySquare;
-        if (square.ShipComponent != null)
-        {
-            if (square.ShipComponent.WasHit)
-            {
-                if (square.ShipComponent.Ship.IsSunk)
-                    mark = componentSunk;
-                else
-                    mark = componentHit;
-            }
-        }
-        else if (square.WasHit)
-        {
-            mark = missedShot;
-        }
+        var mark = square.ShipComponent == null ?
+            (square.WasHit ? missedShot : emptySquare) :
+            (square.ShipComponent.WasHit ? 
+                square.ShipComponent.Ship.WassSunk ? componentSunk : componentHit :
+                emptySquare);
+
         PaintForametted(mark);
     }
 

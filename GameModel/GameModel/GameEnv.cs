@@ -9,7 +9,7 @@ namespace GameModel
     public class GameEnv
     {
         private readonly IMessageDisplayer showGameMessage;
-        private readonly IGameCreator creator;
+        private readonly GameCreator gameCreator;
         private Game? game;
         public Settings Settings {get;} = new Settings();
 
@@ -17,10 +17,10 @@ namespace GameModel
 
         public bool GameActive { get { return game != null; } }
 
-        public GameEnv(IGameCreator creator, IMessageDisplayer message) 
+        public GameEnv(GameCreator gameCreator, IMessageDisplayer showGameMessage) 
         {
-            this.showGameMessage = message;
-            this.creator = creator;
+            this.showGameMessage = showGameMessage;
+            this.gameCreator = gameCreator;
         }
                 
         public bool Restart()
@@ -29,7 +29,7 @@ namespace GameModel
             game = null;
             try
             {
-                game = creator.Create(Settings);
+                game = gameCreator.Execute(Settings);
                 Painter?.PaintAll(game, Settings.DebugMode);
             }
             catch (ShipCreationException e)

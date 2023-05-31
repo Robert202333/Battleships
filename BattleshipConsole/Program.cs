@@ -19,8 +19,13 @@ internal class ConsoleGame
 
     private bool exit = false;
 
+
+    readonly private Dictionary<string, Action> commandMap = new();
     internal ConsoleGame()
     {
+        commandMap.Add(exitCmd, OnExit);
+        commandMap.Add(newCmd, OnNew);
+
         gameEnv.Painter = new BoardPainter();
         Console.WriteLine(initMessage);
         OnNew();
@@ -28,30 +33,24 @@ internal class ConsoleGame
     internal void Run()
     {
         while(!exit)
-        {
-            Console.WriteLine();
-            Console.Write(CreatePrompt());
-            string? input = Console.ReadLine();
-            string upperInput = input != null ? input.ToUpper().Trim() : "";
+        {   
+            string input = GetInput();
+            string upperInput = input.ToUpper();
 
-            switch (upperInput)
-            {
-                case exitCmd:
-                    OnExit();
-                    break;
-
-                case newCmd:
-                    OnNew();
-                    break;
-
-                default:
-                    OnCoordinates(upperInput);
-                    break;
-            }
+            if (commandMap.TryGetValue(upperInput, out Action? action))
+                action();
+            else
+                OnCoordinates(upperInput);
         }
         Console.WriteLine(exitMessage);
     }
 
+    private string GetInput()
+    {
+        Console.WriteLine();
+        Console.Write(CreatePrompt());
+        return Console.ReadLine() ?? "";
+    }
     private string CreatePrompt()
     {
         return $"Exit/New{(gameEnv.GameActive ? "/Shot coordinates" : "")} >> ";

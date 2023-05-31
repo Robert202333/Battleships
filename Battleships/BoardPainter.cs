@@ -155,20 +155,20 @@ namespace Battleships.Painter
             ccc.OnResetSettings(horizontalSize, verticalSize);
         }
 
-        public void PaintShotResult(Tuple<Coordinates, ShotResult, ShipComponent?> shotResult, Game game, bool debugMode)
+        public void PaintShotResult(Tuple<Square, ShotResult> shotResult, Game game, bool debugMode)
         {
-            var (coordinates, result, component) = shotResult;
+            var (square, result) = shotResult;
 
             if (result == ShotResult.Miss)
             {
-                PaintMissDot(coordinates.X, coordinates.Y);
+                PaintMissedShot(square.Coordinates.X, square.Coordinates.Y);
                 return;
             }
 
             if ((result & ShotResult.ShipSunk) != 0)
-                PaintSunkShip(component!.Ship);
+                PaintSunkShip(square.ShipComponent!.Ship);
             else
-                PaintShipComponent(component!, ShipComponentState.Hit);
+                PaintShipComponent(square.ShipComponent!, ShipComponentState.Hit);
         }
 
         public void Clear()
@@ -180,12 +180,19 @@ namespace Battleships.Painter
         {
             Clear();
 
-            PaintCoordinatesDescriptions(game.Board);
-            PaintLines();
-            if (debugMode)
-                PaintDebugShipComponents(game.Board);
-            PaintHitShipComponents(game.Board);
-            PaintMissDots(game.Board);
+            try
+            {
+                PaintCoordinatesDescriptions(game.Board);
+                PaintLines();
+                if (debugMode)
+                    PaintDebugShipComponents(game.Board);
+                PaintHitShipComponents(game.Board);
+                PaintMissedShots(game.Board);
+            }
+            catch
+            {
+                // Catched when window has height = 0
+            }
         }
 
         private void PaintSunkShip(Ship ship)
@@ -200,7 +207,7 @@ namespace Battleships.Painter
             PaintShipComponent(component.Square.Coordinates.X, component.Square.Coordinates.Y, GetShipComponentBrush(state));
         }
 
-        private void PaintMissDot(uint xCoor, uint yCoor)
+        private void PaintMissedShot(uint xCoor, uint yCoor)
         {
             double x = ccc.GetMissDotCenterX(xCoor);
             double y = ccc.GetMissDotCenterY(yCoor);
@@ -288,14 +295,14 @@ namespace Battleships.Painter
             board.VisitSquares(paint, hasHitShipComponent);
         }
 
-        private void PaintMissDots(Board board)
+        private void PaintMissedShots(Board board)
         {
             static bool hasMissedShot(Square square)
             {
                 return square.WasHit && square.ShipComponent == null;
             }
 
-            board.VisitSquares((square, x, y) => PaintMissDot(x, y), hasMissedShot);
+            board.VisitSquares((square, x, y) => PaintMissedShot(x, y), hasMissedShot);
         }
 
         private void PaintLine(double x1, double y1, double x2, double y2)

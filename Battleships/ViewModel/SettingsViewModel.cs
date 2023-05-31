@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Globalization;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Data;
@@ -10,9 +12,18 @@ using GameModel;
 namespace Battleships
 {
     
-    internal class SettingsViewModel
+    internal class SettingsViewModel : INotifyPropertyChanged
     {
-        public Settings? Settings { get; set; }
+        private Settings? settings;
+        public Settings? Settings 
+        { 
+            get { return settings; }
+            set
+            {
+                settings = value;
+                OnPropertyChanged();
+            }
+        }
 
         public List<CoordinateDescriptionType> CoordinateDescriptionTypes { get; } 
             = Enum.GetValues(typeof(CoordinateDescriptionType)).Cast<CoordinateDescriptionType>().ToList();
@@ -21,8 +32,14 @@ namespace Battleships
         {
 
         }
+
+        public event PropertyChangedEventHandler? PropertyChanged;
+        private void OnPropertyChanged([CallerMemberName] string propertyName = "")
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        }
     }
-    
+
     public class CoordinateDescriptionTypeConverter : IValueConverter
     {
         public object Convert(object value, System.Type targetType, object parameter, CultureInfo culture)

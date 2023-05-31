@@ -81,7 +81,7 @@ namespace GameModel
             Chain.Add(coordinates);
         }
 
-        public bool Occupies(Coordinates coordinates)
+        public bool Includes(Coordinates coordinates)
         {
             return Chain.Any(coord => coord.Equals(coordinates));
         }

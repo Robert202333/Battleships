@@ -54,7 +54,7 @@ namespace Battleships
             SettingsCmd = new Command((object? obj) => Settings());
             ShotCmd = new Command((object? obj) => Shot(), (object? obj) => GameActive && ShotCcordinatesHaveValidFormat());
 
-            gameEnv = new GameEnv(new DefaultGameCreator(), new MessageDisplayers());
+            gameEnv = new GameEnv(new DefaultGameCreator(), new MessageDisplayer());
         }
 
         public event PropertyChangedEventHandler? PropertyChanged;

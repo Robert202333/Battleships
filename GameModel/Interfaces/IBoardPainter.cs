@@ -4,9 +4,9 @@ namespace GameModel
 {
     public interface IBoardPainter
     {
-        void OnSettingsChange(uint horizontalSize, uint verticalSize);
-        void PaintShotResult(Tuple<Coordinates, ShotResult, ShipComponent?> shotResult, Game game, bool debugMode);
+        void PaintAll(Game game, bool debugMode);        
+        void PaintShotResult(Tuple<Square, ShotResult> shotResult, Game game, bool debugMode);
         void Clear();
-        void PaintAll(Game game, bool debugMode);
+        void OnSettingsChange(uint horizontalSize, uint verticalSize);
     }
 }

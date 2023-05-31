@@ -9,7 +9,7 @@ namespace GameModel
     public class GameEnv
     {
         private readonly IMessageDisplayer showGameMessage;
-        private readonly GameCreator gameCreator;
+        private readonly AbstractGameCreator gameCreator;
         private Game? game;
         public Settings Settings {get;} = new Settings();
 
@@ -17,7 +17,7 @@ namespace GameModel
 
         public bool GameActive { get { return game != null; } }
 
-        public GameEnv(GameCreator gameCreator, IMessageDisplayer showGameMessage) 
+        public GameEnv(AbstractGameCreator gameCreator, IMessageDisplayer showGameMessage) 
         {
             this.showGameMessage = showGameMessage;
             this.gameCreator = gameCreator;
@@ -48,22 +48,22 @@ namespace GameModel
         {
             try
             {
-                Tuple<Coordinates, ShotResult, ShipComponent?> result = game!.ProcessShot(xCoor, yCoor);
+                Tuple<Square, ShotResult> result = game!.ProcessShot(xCoor, yCoor);
                 Painter?.PaintShotResult(result, game, Settings.DebugMode);
 
-                var (coordinates, shotResult, shipComponent) = result;
+                var (square, shotResult) = result;
 
                 if ((shotResult & ShotResult.GameEnd) != 0)
                 {
-                    showGameMessage.ShowInformation("Shot result", $"{shipComponent!.Ship.Name} was sunk and you won !");
+                    showGameMessage.ShowInformation("Shot result", $"{square.ShipComponent!.Ship.Name} was sunk and you won !");
                 }
                 else if ((shotResult & ShotResult.ShipSunk) != 0)
                 {
-                    showGameMessage.ShowInformation("Shot result", $"{shipComponent!.Ship.Name} was sunk !");
+                    showGameMessage.ShowInformation("Shot result", $"{square.ShipComponent!.Ship.Name} was sunk !");
                 }
                 else if ((shotResult & ShotResult.Hit) != 0)
                 {
-                    showGameMessage.ShowInformation("Shot result", $"{shipComponent!.Ship.Name} was hit !");
+                    showGameMessage.ShowInformation("Shot result", $"{square.ShipComponent!.Ship.Name} was hit !");
                 }
                 return (shotResult & ShotResult.GameEnd) != 0;
             }
@@ -103,6 +103,7 @@ namespace GameModel
                 return Tuple.Create(xCoor, yCoor);
             else
                 throw new InvalidDescriptionException();
+
 
             // Reads up to 2 digit number
             static string ReadNumber(string coor, int startIndex)

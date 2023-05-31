@@ -8,7 +8,7 @@ using GameModel;
 
 namespace Battleships
 {
-    internal class MessageDisplayers : IMessageDisplayer
+    internal class MessageDisplayer : IMessageDisplayer
     {
         public void ShowWarning(string type, string message)
         {

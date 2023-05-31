@@ -3,14 +3,14 @@ using GameModel;
 
 
 var game = new ConsoleGame();
-game.Execute();
+game.Run();
 
 internal class ConsoleGame
 {
     const string initMessage = "Battleships";
     const string newGameMessage = "New game";
     const string exitMessage = "Thank you for playing";
-    const string invalidCoordinatesFormat = "Invalid coordinate format";
+    const string invalidCoordinatesFormat = "Invalid coordinates format";
 
     const string exitCmd = "EXIT";
     const string newCmd = "NEW";
@@ -25,7 +25,7 @@ internal class ConsoleGame
         Console.WriteLine(initMessage);
         OnNew();
     }
-    internal void Execute()
+    internal void Run()
     {
         while(!exit)
         {

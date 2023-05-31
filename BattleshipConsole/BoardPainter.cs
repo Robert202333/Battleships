@@ -17,7 +17,7 @@ public class BoardPainter : IBoardPainter
         // settings change not provide for console
     }
 
-    public void PaintShotResult(Tuple<Coordinates, ShotResult, ShipComponent?> shotResult, Game game, bool debugMode)
+    public void PaintShotResult(Tuple<Square, ShotResult> shotResult, Game game, bool debugMode)
     {
         PaintAll(game, debugMode);
     }

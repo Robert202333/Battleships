@@ -3,22 +3,21 @@
 
 namespace GameModel
 {
+    using ShipCreationData = Tuple<CoordinatesChain, ShipDescription>;
     static internal class ComponentCreationStrategies
     {
-        private static Random random = new Random();
-
-        private static Direction GetRandomDirection()
+        private static Direction GetRandomDirection(Random random)
         {
             return (Direction)random.Next(4);
         }
 
-        internal static Func<CoordinatesChain, Predicate<Coordinates>, bool> Bent =
-            (coordinatesChain, coordinatesValidator) =>
+        internal static Func<CoordinatesChain, Predicate<Coordinates>, Random, bool> Bent =
+            (coordinatesChain, coordinatesValidator, random) =>
         {
             bool isDirectionValid(Direction direction)
             {
                 var nextCoordinates = coordinatesChain.Last.GetInDirection(direction);
-                return coordinatesValidator(nextCoordinates) && !coordinatesChain.Occupies(nextCoordinates);
+                return coordinatesValidator(nextCoordinates) && !coordinatesChain.Includes(nextCoordinates);
             };
 
             Direction[] availableDirections = Enum.GetValues(typeof(Direction)).Cast<Direction>().
@@ -33,10 +32,10 @@ namespace GameModel
             return true;
         };
 
-        internal static Func<CoordinatesChain, Predicate<Coordinates>, bool> Straight =
-            (coordinatesChain, coordinatesValidator) =>
+        internal static Func<CoordinatesChain, Predicate<Coordinates>, Random, bool> Straight =
+            (coordinatesChain, coordinatesValidator, random) =>
         {
-            var direction = coordinatesChain.GetLastDirection() ?? GetRandomDirection();
+            var direction = coordinatesChain.GetLastDirection() ?? GetRandomDirection(random);
             var nextCoordinations = coordinatesChain.Last.GetInDirection(direction);
 
             if (!coordinatesValidator(nextCoordinations))
@@ -47,109 +46,72 @@ namespace GameModel
         };
     }
 
-
-    internal class CoordinatesChainsCreator
+    
+    internal class ShipsCreator
     {
-        private const int CreateShipTaskNum = 4;
-        private const int CreationMaxTime = 6; // seconds
+        private Random random = new Random();
+        private readonly bool[,] board;
 
-        private static Random random = new Random();
-        private ThreadLocal<bool[,]>? threadLocalBoard;
-
-        private CancellationTokenSource? CancelSource;
+        private readonly CancellationToken cancellationToken;
 
         private uint HorizontalSize { get { return settings.HorizontalSize; } }
         private uint VerticalSize { get { return settings.VerticalSize; } }
 
         private readonly Settings settings;
 
-        internal CoordinatesChainsCreator(Settings settings)
+        internal ShipsCreator(Settings settings, CancellationToken cancellationToken)
         {
             this.settings = settings;
+            this.cancellationToken = cancellationToken;
+
+            board = new bool[VerticalSize, HorizontalSize];
+            for (int y = 0; y < board.GetLength(0); y++)
+                for (int x = 0; x < board.GetLength(1); x++)
+                    board[y, x] = true;
+
         }
 
 
-
-        internal List<Tuple<CoordinatesChain, ShipDescription>> ExecuteCreateCoordinatesChains()
-        {
-            bool debugCreationMode = false;
-            if (debugCreationMode)
-            {
-                // No multithred approach
-                CancelSource = new CancellationTokenSource();
-                return CreateCoordinatesChains();
-            }
-            else
-            {
-                CancelSource = new CancellationTokenSource();
-                CancelSource.CancelAfter(CreationMaxTime * 1000);
-
-                List<Task<List<Tuple<CoordinatesChain, ShipDescription>>>> tasks = new ();
-                for (int i = 0; i < CreateShipTaskNum; i++)
-                    tasks.Add(new (() => CreateCoordinatesChains()));
-
-                tasks.ForEach(task => task.Start());
-
-                int finishedTask = Task.WaitAny(tasks.ToArray());
-
-                CancelSource.Cancel();
-
-                if (tasks[finishedTask].Result.Count == 0)
-                    throw new ShipCreationException();
-                return tasks[finishedTask].Result;
-            }
-        }
-
-        private List<Tuple<CoordinatesChain, ShipDescription>> CreateCoordinatesChains()
+        internal List<ShipCreationData> Execute()
         {
             try
             {
-                InitSquares();
-                List<Tuple<CoordinatesChain, ShipDescription>> coordinatesChains = new ();
+                List<ShipCreationData> shipCreationDatas = new();
 
                 settings.ShipDescriptions.ForEach(shipDescription =>
                 {
                     for (int i = 0; i < shipDescription.Count; i++)
                     {
-                        CancelSource!.Token.ThrowIfCancellationRequested();
+                        cancellationToken.ThrowIfCancellationRequested();
 
-                        coordinatesChains.Add(Tuple.Create(CreateCoordinatesChain(shipDescription.Size), shipDescription));
+                        shipCreationDatas.Add(Tuple.Create(CreateShipPosition(shipDescription.Size), shipDescription));
                     }
                 });
-                return coordinatesChains;
+                return shipCreationDatas;
             }
             catch (OperationCanceledException)
             {
-                return new ();
+                return new();
             }
             catch (Exception e)
             {
                 Debug.WriteLine(e.Message);
-                return new ();
+                return new();
             }
         }
 
-        private CoordinatesChain CreateCoordinatesChain(uint size)
+        private CoordinatesChain CreateShipPosition(uint size)
         {
             while (true)
             {
-                CancelSource!.Token.ThrowIfCancellationRequested();
+                cancellationToken.ThrowIfCancellationRequested();
 
-                CoordinatesChain? coordinateChain = TryCreateCoordinatesChain(size,
+                CoordinatesChain? shipPosition = TryCreateShipPosition(size,
                     settings.StrightShips ? ComponentCreationStrategies.Straight : ComponentCreationStrategies.Bent);
 
-                if (coordinateChain != null)
-                    return coordinateChain;
+                if (shipPosition != null)
+                    return shipPosition;
             }
-        }
-
-        private void InitSquares()
-        {
-            threadLocalBoard = new ThreadLocal<bool[,]>(() => new bool[VerticalSize, HorizontalSize]);
-
-            for (int y = 0; y < threadLocalBoard.Value!.GetLength(0); y++)
-                for (int x = 0; x < threadLocalBoard.Value!.GetLength(1); x++)
-                    threadLocalBoard.Value[y, x] = true;
         }
 
         private bool IsSquareAllowed(Coordinates coor)
@@ -157,19 +119,19 @@ namespace GameModel
             return AreCoordinatesValid(coor) && IsSquareAvailable(coor);
         }
 
-        private CoordinatesChain? TryCreateCoordinatesChain(uint size, Func<CoordinatesChain, Predicate<Coordinates>, bool> addComponent)
+        private CoordinatesChain? TryCreateShipPosition(uint size, Func<CoordinatesChain, Predicate<Coordinates>, Random, bool> addCoordinatesToChain)
         {
-            CoordinatesChain coordinatesChain = new CoordinatesChain();
-            coordinatesChain.Add(GetRandomSquare());
+            CoordinatesChain shipPosition = new CoordinatesChain();
+            shipPosition.Add(GetRandomSquare());
 
             for (int i = 1; i < size; i++)
             {
-                if (!addComponent(coordinatesChain, IsSquareAllowed))
+                if (!addCoordinatesToChain(shipPosition, IsSquareAllowed, random))
                     return null;
             }
 
-            coordinatesChain.Chain.ForEach(SetShipSquareUnavailable);
-            return coordinatesChain;
+            shipPosition.Chain.ForEach(SetShipSquareUnavailable);
+            return shipPosition;
         }
 
         private void SetShipSquareUnavailable(Coordinates coor)
@@ -179,11 +141,11 @@ namespace GameModel
                 SetAllAdjacentSquaresUnavailable(coor);
         }
 
-        Coordinates GetRandomSquare()
+        private Coordinates GetRandomSquare()
         {
             while (true)
             {
-                CancelSource!.Token.ThrowIfCancellationRequested();
+                cancellationToken.ThrowIfCancellationRequested();
 
                 int x = random.Next((int)HorizontalSize);
                 int y = random.Next((int)VerticalSize);
@@ -199,7 +161,7 @@ namespace GameModel
 
         private bool IsSquareAvailable(uint x, uint y)
         {
-            return threadLocalBoard!.Value![y, x];
+            return board[y, x];
         }
 
         private void SetSquareUnavailable(in Coordinates coor)
@@ -209,7 +171,7 @@ namespace GameModel
 
         private void SetSquareUnavailable(uint x, uint y)
         {
-            threadLocalBoard!.Value![y, x] = false;
+            board[y, x] = false;
         }
 
         private void SetAllAdjacentSquaresUnavailable(in Coordinates coor)
@@ -240,28 +202,75 @@ namespace GameModel
             return x >= 0 && x < HorizontalSize && y >= 0 && y < VerticalSize;
         }
     }
+    
+    internal class ShipCreationDatasProvider
+    {
+        private const int CreateShipTaskNum = 4;
+        private const int CreationMaxTime = 6; // seconds
 
-    public class DefaultGameCreator : GameCreator
+        private readonly Settings settings;
+
+        internal ShipCreationDatasProvider(Settings settings)
+        {
+            this.settings = settings;
+        }
+
+        internal List<ShipCreationData> Execute()
+        {
+            bool debugCreationMode = false;
+            if (debugCreationMode)
+            {
+                // No multithread approach
+                CancellationTokenSource cancelSource = new CancellationTokenSource();
+                return CreateShipCreationDatas(cancelSource.Token);
+            }
+            else
+            {
+                CancellationTokenSource cancelSource = new CancellationTokenSource();
+                cancelSource.CancelAfter(CreationMaxTime * 1000);
+
+                Task<List<ShipCreationData>>[] tasks = 
+                    new Task<List<ShipCreationData>>[CreateShipTaskNum];
+
+                for(int i = 0; i < CreateShipTaskNum; i++)
+                    tasks[i] = new(() => CreateShipCreationDatas(cancelSource.Token));
+
+                foreach (var task in tasks)
+                    task.Start();
+
+                int finishedTask = Task.WaitAny(tasks);
+
+                cancelSource.Cancel();
+
+                if (tasks[finishedTask].Result.Count == 0)
+                    throw new ShipCreationException();
+
+                return tasks[finishedTask].Result;
+            }
+        }
+
+        private List<ShipCreationData> CreateShipCreationDatas(CancellationToken cancellationToken)
+        {
+            ShipsCreator creator = new(settings, cancellationToken);
+            return creator.Execute();
+        }
+    }
+
+
+    public class DefaultGameCreator : AbstractGameCreator
     {
         public DefaultGameCreator() {}
 
-
-
         protected override IEnumerable<Ship> CreateShips(Board board, Settings settings)
         {
-            var coordinatesChains = CreateCoordinatesChains(settings);
+            ShipCreationDatasProvider provider = new (settings);
+            var shipCreationDatas = provider.Execute();
 
-            return coordinatesChains.Select(coordinateChain =>
+            return shipCreationDatas.Select(shipCreationData =>
             {
-                var (chain, shipDescription) = coordinateChain;
-                return CreateShip(shipDescription.Name, chain.Chain, board);
+                var (shipPosition, shipDescription) = shipCreationData;
+                return CreateShip(shipDescription.Name, shipPosition.Chain, board);
             });
-        }
-
-        private static List<Tuple<CoordinatesChain, ShipDescription>> CreateCoordinatesChains(Settings settings)
-        {
-            CoordinatesChainsCreator ccCraetor = new CoordinatesChainsCreator(settings);
-            return ccCraetor.ExecuteCreateCoordinatesChains();
         }
     }
 }

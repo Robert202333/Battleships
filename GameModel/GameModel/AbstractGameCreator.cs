@@ -7,9 +7,9 @@ using System.Threading.Tasks;
 namespace GameModel
 {
     // Only way to create ships and 
-    public abstract class GameCreator
+    public abstract class AbstractGameCreator
     {
-        public GameCreator() { }
+        public AbstractGameCreator() { }
         protected Ship CreateShip(string name, IEnumerable<Coordinates> coordinatesChain, Board board)
         {
             var ship = new Ship(name);

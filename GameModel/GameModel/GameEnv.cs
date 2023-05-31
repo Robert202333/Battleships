@@ -30,7 +30,7 @@ namespace GameModel
             try
             {
                 game = gameCreator.Execute(Settings);
-                Painter?.PaintAll(game, Settings.DebugMode);
+                Painter?.PaintAll(game.Board, Settings.DebugMode);
             }
             catch (ShipCreationException e)
             {
@@ -49,7 +49,7 @@ namespace GameModel
             try
             {
                 Tuple<Square, ShotResult> result = game!.ProcessShot(xCoor, yCoor);
-                Painter?.PaintShotResult(result, game, Settings.DebugMode);
+                Painter?.PaintShotResult(result, game.Board, Settings.DebugMode);
 
                 var (square, shotResult) = result;
 
@@ -118,7 +118,7 @@ namespace GameModel
         public void Paint()
         {
             if (game != null)
-                Painter?.PaintAll(game, Settings.DebugMode);
+                Painter?.PaintAll(game.Board, Settings.DebugMode);
         }
 
         public void OnSettingsChange()

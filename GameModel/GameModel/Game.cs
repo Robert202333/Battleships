@@ -14,9 +14,9 @@ namespace GameModel
         GameEnd = 8
     }
 
-    public class Game
+    internal class Game
     {
-        public Board Board { get; init; }
+        internal Board Board { get; init; }
 
         private readonly List<Ship> Ships;
 

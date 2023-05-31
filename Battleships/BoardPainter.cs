@@ -155,7 +155,7 @@ namespace Battleships.Painter
             ccc.OnResetSettings(horizontalSize, verticalSize);
         }
 
-        public void PaintShotResult(Tuple<Square, ShotResult> shotResult, Game game, bool debugMode)
+        public void PaintShotResult(Tuple<Square, ShotResult> shotResult, Board board, bool debugMode)
         {
             var (square, result) = shotResult;
 
@@ -176,18 +176,18 @@ namespace Battleships.Painter
             canvas.Children.Clear();
         }
 
-        public void PaintAll(Game game, bool debugMode)
+        public void PaintAll(Board board, bool debugMode)
         {
             Clear();
 
             try
             {
-                PaintCoordinatesDescriptions(game.Board);
+                PaintCoordinatesDescriptions(board);
                 PaintLines();
                 if (debugMode)
-                    PaintDebugShipComponents(game.Board);
-                PaintHitShipComponents(game.Board);
-                PaintMissedShots(game.Board);
+                    PaintDebugShipComponents(board);
+                PaintHitShipComponents(board);
+                PaintMissedShots(board);
             }
             catch
             {

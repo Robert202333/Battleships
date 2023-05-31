@@ -17,9 +17,9 @@ public class BoardPainter : IBoardPainter
         // settings change not provide for console
     }
 
-    public void PaintShotResult(Tuple<Square, ShotResult> shotResult, Game game, bool debugMode)
+    public void PaintShotResult(Tuple<Square, ShotResult> shotResult, Board board, bool debugMode)
     {
-        PaintAll(game, debugMode);
+        PaintAll(board, debugMode);
     }
 
     public void Clear()
@@ -27,29 +27,29 @@ public class BoardPainter : IBoardPainter
         // No action in console app
     }
 
-    public void PaintAll(Game game, bool debugMode)
+    public void PaintAll(Board board, bool debugMode)
     {
-        PaintHorizontalDescriptions(game);
-        for (uint i = 0; i < game.Board.VerticalDescriptor.Size; i++)
-            PaintHoriontalLine(game, i);
-        PaintHorizontalDescriptions(game);
+        PaintHorizontalDescriptions(board);
+        for (uint i = 0; i < board.VerticalDescriptor.Size; i++)
+            PaintHoriontalLine(board, i);
+        PaintHorizontalDescriptions(board);
         Console.WriteLine();
     }
 
-    private void PaintHorizontalDescriptions(Game game)
+    private void PaintHorizontalDescriptions(Board board)
     {
         PaintForamatted("");
-        for (uint i = 0; i < game.Board.HorizontalDescriptor.Size; i++)
-            PaintForamatted(game.Board.HorizontalDescriptor.GetDescription(i));
+        for (uint i = 0; i < board.HorizontalDescriptor.Size; i++)
+            PaintForamatted(board.HorizontalDescriptor.GetDescription(i));
         Console.WriteLine();
     }
 
-    private void PaintHoriontalLine(Game game, uint verticalIndex)
+    private void PaintHoriontalLine(Board board, uint verticalIndex)
     {
-        PaintForamatted(game.Board.VerticalDescriptor.GetDescription(verticalIndex));
-        for (uint i = 0; i < game.Board.HorizontalDescriptor.Size; i++)
-            PaintSquare(game.Board.GetSquare(i, verticalIndex));
-        Console.WriteLine(game.Board.VerticalDescriptor.GetDescription(verticalIndex));
+        PaintForamatted(board.VerticalDescriptor.GetDescription(verticalIndex));
+        for (uint i = 0; i < board.HorizontalDescriptor.Size; i++)
+            PaintSquare(board.GetSquare(i, verticalIndex));
+        Console.WriteLine(board.VerticalDescriptor.GetDescription(verticalIndex));
     }
 
     private void PaintSquare(Square square)

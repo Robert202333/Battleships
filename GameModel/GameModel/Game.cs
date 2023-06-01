@@ -31,18 +31,17 @@ namespace GameModel
         internal Tuple<Square, ShotResult> ProcessShot(string xDescr, string yDescr)
         {
             var coordinates = Board.ConvertToCoordinates(xDescr, yDescr);
-
             var square = Board.GetSquare(coordinates.X, coordinates.Y);
+
             if (square.WasHit)
                 throw new RepeatedShotException();
 
             square.WasHit = true;
-            if (square.ShipComponent != null)
-                square.ShipComponent.WasHit = true;
 
             if (square.ShipComponent == null)
                 return new Tuple<Square, ShotResult>(square, ShotResult.Miss);
 
+            square.ShipComponent.WasHit = true;
             ShotResult shotResult = ShotResult.Hit;
 
             if (square.ShipComponent.Ship.WasSunk)

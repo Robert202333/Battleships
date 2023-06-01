@@ -60,13 +60,6 @@
         public CoordinateDescriptor VerticalDescriptor { get; init; }
         public CoordinateDescriptor HorizontalDescriptor { get; init; }
 
-        public Square GetSquare(int x, int y)
-        {
-            if (x < 0 || x >= squares.GetLength(1) || y < 0 || y >= squares.GetLength(0))
-                throw new CoordinateOutOfBoardException($"({x}, {y}) out of board.");
-            return squares[y, x];
-        }
-
         internal Board(CoordinateDescriptor horizontalDescriptor, CoordinateDescriptor verticalDescriptor)
         {
             VerticalDescriptor = verticalDescriptor;
@@ -74,8 +67,19 @@
 
             squares = new Square[VerticalDescriptor.Size, HorizontalDescriptor.Size];
             for (int y = 0; y < squares.GetLength(0); y++)
+            {
                 for (int x = 0; x < squares.GetLength(1); x++)
+                {
                     squares[y, x] = new Square(new Coordinates(x, y));
+                }
+            }
+        }
+
+        public Square GetSquare(int x, int y)
+        {
+            if (x < 0 || x >= squares.GetLength(1) || y < 0 || y >= squares.GetLength(0))
+                throw new CoordinateOutOfBoardException($"({x}, {y}) out of board.");
+            return squares[y, x];
         }
 
         internal Coordinates ConvertToCoordinates(string xDescription, string yDescription)

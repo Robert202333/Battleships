@@ -6,10 +6,10 @@ using System.Threading.Tasks;
 
 namespace GameModel
 {
-    public class RepeatedHitException : Exception
+    public class RepeatedShotException : Exception
     {
         const string message = "The same square hit again";
-        public RepeatedHitException() : base(message)
+        public RepeatedShotException() : base(message)
         {
         }
     }
@@ -27,6 +27,14 @@ namespace GameModel
         {
         }
     }
+
+    public class CoordinateOutOfBoardException : Exception
+    {
+        public CoordinateOutOfBoardException(string message) : base(message)
+        {
+        }
+    }
+
 
     public class ShipCreationException : Exception
     {

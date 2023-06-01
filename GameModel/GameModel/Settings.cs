@@ -15,14 +15,14 @@ namespace GameModel
     public class ShipDescription
     {
         public string Name { get; set; } = "";
-        public uint Size { get; set; }
-        public uint Count { get; set; }
+        public int Size { get; set; }
+        public int Count { get; set; }
     }
 
     public class Settings
     {
-        public uint HorizontalSize { get; set; } = 10;
-        public uint VerticalSize { get; set; } = 10;
+        public int HorizontalSize { get; set; } = 10;
+        public int VerticalSize { get; set; } = 10;
 
         public CoordinateDescriptionType HorizontalCoordinateDescriptionType { get; set; } = CoordinateDescriptionType.Letter;
         public CoordinateDescriptionType VerticalCoordinateDescriptionType { get; set; } = CoordinateDescriptionType.Number;
@@ -32,10 +32,10 @@ namespace GameModel
             new () { Name = "Destroyer", Count = 2, Size = 2},
             new () { Name = "Submarine", Count = 1, Size = 3},
             new () { Name = "Cruiser", Count = 1, Size = 4},
-            new () { Name = "Carrier", Count = 1, Size = 5}
+            new () { Name = "Battleship", Count = 1, Size = 5}
         };
 
-        public bool StrightShips { get; set; } = true;
+        public bool StraightShips { get; set; } = true;
         public bool ShipsCanStick { get; set; } = false;
 
         public bool DebugMode { get; set; } = false;
@@ -47,7 +47,7 @@ namespace GameModel
         // UI doesn't provude any validation. Called after leaving settings dialog
         public void Validate()
         {
-            static uint Clamp(uint value, uint min, uint max)
+            static int Clamp(int value, int min, int max)
             {
                 return (value < min) ? min : (value > max) ? max : value;
             }

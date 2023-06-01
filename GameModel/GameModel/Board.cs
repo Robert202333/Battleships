@@ -3,30 +3,30 @@
     public class CoordinateDescriptor
     {
         private readonly string[] descriptions;
-        private readonly Dictionary<string, uint> descriptionToCoordinateMap = new Dictionary<string, uint>();
+        private readonly Dictionary<string, int> descriptionToCoordinateMap = new Dictionary<string, int>();
 
-        public uint Size
+        public int Size
         {
-            get { return (uint)descriptions.Length; }
+            get { return descriptions.Length; }
         }
 
         internal CoordinateDescriptor(IEnumerable<string> descriptions)
         {
             this.descriptions = descriptions.ToArray();
-            for (uint i = 0; i < this.descriptions.Length; i++)
+            for (int i = 0; i < this.descriptions.Length; i++)
                 descriptionToCoordinateMap.Add(this.descriptions[i], i);
         }
 
 
-        public string GetDescription(uint coordinate)
+        public string GetDescription(int coordinate)
         {
-            if (coordinate > descriptions.Length)
+            if (coordinate < 0 || coordinate >= descriptions.Length)
                 throw new ArgumentOutOfRangeException();
 
             return descriptions[coordinate];
         }
 
-        internal uint GetCoordinate(string description)
+        internal int GetCoordinate(string description)
         {
             if (descriptionToCoordinateMap.TryGetValue(description, out var coordinateValue))
                 return coordinateValue;
@@ -60,8 +60,10 @@
         public CoordinateDescriptor VerticalDescriptor { get; init; }
         public CoordinateDescriptor HorizontalDescriptor { get; init; }
 
-        public Square GetSquare(uint x, uint y)
+        public Square GetSquare(int x, int y)
         {
+            if (x < 0 || x >= squares.GetLength(1) || y < 0 || y >= squares.GetLength(0))
+                throw new CoordinateOutOfBoardException($"({x}, {y}) out of board.");
             return squares[y, x];
         }
 
@@ -71,8 +73,8 @@
             HorizontalDescriptor = horizontalDescriptor;
 
             squares = new Square[VerticalDescriptor.Size, HorizontalDescriptor.Size];
-            for (uint y = 0; y < squares.GetLength(0); y++)
-                for (uint x = 0; x < squares.GetLength(1); x++)
+            for (int y = 0; y < squares.GetLength(0); y++)
+                for (int x = 0; x < squares.GetLength(1); x++)
                     squares[y, x] = new Square(new Coordinates(x, y));
         }
 
@@ -81,11 +83,11 @@
             return new Coordinates(HorizontalDescriptor.GetCoordinate(xDescription), 
                                    VerticalDescriptor.GetCoordinate(yDescription));
         }
-        public void VisitSquares(Action<Square, uint, uint> action, Predicate<Square>? predicate = null)
+        public void VisitSquares(Action<Square, int, int> action, Predicate<Square>? predicate = null)
         {
-            for (uint y = 0; y < squares.GetLength(0); y++)
+            for (int y = 0; y < squares.GetLength(0); y++)
             {
-                for (uint x = 0; x < squares.GetLength(1); x++)
+                for (int x = 0; x < squares.GetLength(1); x++)
                 {
                     var square = GetSquare(x, y);
                     if (predicate == null || predicate(square))

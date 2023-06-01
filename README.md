@@ -13,5 +13,7 @@ WPF version provides also possibility to edit game configuration like number and
 As user (in WPF version) may set his own rules, it may happen that ships placement on map may be difficult or impossible.
 Ship creation is done by running parallel tasks. Result is taken from the first finished one. If no task is finished in 6 seconds all tasks are interrupted.
 
-GameModel library allows to customize ship placement algorithm (by deriving from AbstractGameCreator abstract class), however WPF and Console applications use  
+GameModel library allows to customize ships placement algorithm (by deriving from AbstractGameCreator class), however WPF and Console applications use  
 provided DefaultGameCreator.
+
+Unit tests cover GameModel module. 

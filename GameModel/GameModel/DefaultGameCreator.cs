@@ -4,6 +4,8 @@
 namespace GameModel
 {
     using ShipCreationData = Tuple<CoordinatesChain, ShipDescription>;
+
+
     static internal class ComponentCreationStrategies
     {
         private static Direction GetRandomDirection(Random random)
@@ -49,26 +51,31 @@ namespace GameModel
     
     internal class ShipsCreator
     {
-        private Random random = new Random();
+        private readonly Random random = new Random();
         private readonly bool[,] board;
 
         private readonly CancellationToken cancellationToken;
 
-        private uint HorizontalSize { get { return settings.HorizontalSize; } }
-        private uint VerticalSize { get { return settings.VerticalSize; } }
+        private int HorizontalSize { get { return settings.HorizontalSize; } }
+        private int VerticalSize { get { return settings.VerticalSize; } }
 
         private readonly Settings settings;
 
-        internal ShipsCreator(Settings settings, CancellationToken cancellationToken)
+        internal ShipsCreator(Settings settings, CancellationToken cancellationToken, int randomSeed = 0)
         {
             this.settings = settings;
             this.cancellationToken = cancellationToken;
 
+            random = (randomSeed != 0) ? new Random(randomSeed) : new Random();
+
             board = new bool[VerticalSize, HorizontalSize];
             for (int y = 0; y < board.GetLength(0); y++)
+            {
                 for (int x = 0; x < board.GetLength(1); x++)
+                {
                     board[y, x] = true;
-
+                }
+            }
         }
 
 
@@ -100,14 +107,14 @@ namespace GameModel
             }
         }
 
-        private CoordinatesChain CreateShipPosition(uint size)
+        private CoordinatesChain CreateShipPosition(int size)
         {
             while (true)
             {
                 cancellationToken.ThrowIfCancellationRequested();
 
                 CoordinatesChain? shipPosition = TryCreateShipPosition(size,
-                    settings.StrightShips ? ComponentCreationStrategies.Straight : ComponentCreationStrategies.Bent);
+                    settings.StraightShips ? ComponentCreationStrategies.Straight : ComponentCreationStrategies.Bent);
 
                 if (shipPosition != null)
                     return shipPosition;
@@ -119,7 +126,7 @@ namespace GameModel
             return AreCoordinatesValid(coor) && IsSquareAvailable(coor);
         }
 
-        private CoordinatesChain? TryCreateShipPosition(uint size, Func<CoordinatesChain, Predicate<Coordinates>, Random, bool> addCoordinatesToChain)
+        private CoordinatesChain? TryCreateShipPosition(int size, Func<CoordinatesChain, Predicate<Coordinates>, Random, bool> addCoordinatesToChain)
         {
             CoordinatesChain shipPosition = new CoordinatesChain();
             shipPosition.Add(GetRandomSquare());
@@ -147,10 +154,10 @@ namespace GameModel
             {
                 cancellationToken.ThrowIfCancellationRequested();
 
-                int x = random.Next((int)HorizontalSize);
-                int y = random.Next((int)VerticalSize);
-                if (IsSquareAvailable((uint)x, (uint)y))
-                    return new Coordinates((uint)x, (uint)y);
+                int x = random.Next(HorizontalSize);
+                int y = random.Next(VerticalSize);
+                if (IsSquareAvailable(x, y))
+                    return new Coordinates(x, y);
             }
         }
 
@@ -159,7 +166,7 @@ namespace GameModel
             return IsSquareAvailable(coordinates.X, coordinates.Y);
         }
 
-        private bool IsSquareAvailable(uint x, uint y)
+        private bool IsSquareAvailable(int x, int y)
         {
             return board[y, x];
         }
@@ -169,7 +176,7 @@ namespace GameModel
             SetSquareUnavailable(coor.X, coor.Y);
         }
 
-        private void SetSquareUnavailable(uint x, uint y)
+        private void SetSquareUnavailable(int x, int y)
         {
             board[y, x] = false;
         }
@@ -188,7 +195,7 @@ namespace GameModel
                     if (!AreCoordinatesValid(x, y))
                         continue;
 
-                    SetSquareUnavailable((uint)x, (uint)y);
+                    SetSquareUnavailable(x, y);
                 }
             }
         }

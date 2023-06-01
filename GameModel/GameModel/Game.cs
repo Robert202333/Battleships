@@ -34,18 +34,18 @@ namespace GameModel
 
             var square = Board.GetSquare(coordinates.X, coordinates.Y);
             if (square.WasHit)
-                throw new RepeatedHitException();
+                throw new RepeatedShotException();
 
             square.WasHit = true;
             if (square.ShipComponent != null)
                 square.ShipComponent.WasHit = true;
 
             if (square.ShipComponent == null)
-                return Tuple.Create<Square, ShotResult>(square, ShotResult.Miss);
+                return new Tuple<Square, ShotResult>(square, ShotResult.Miss);
 
             ShotResult shotResult = ShotResult.Hit;
 
-            if (square.ShipComponent.Ship.WassSunk)
+            if (square.ShipComponent.Ship.WasSunk)
                 shotResult |= ShotResult.ShipSunk;
 
             if (AllShipsWereSunk())
@@ -57,7 +57,7 @@ namespace GameModel
 
         private bool AllShipsWereSunk()
         {
-            return Ships.All(ship => ship.WassSunk);
+            return Ships.All(ship => ship.WasSunk);
         }
     }
 }

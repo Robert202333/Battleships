@@ -13,14 +13,14 @@ namespace GameModel
         protected Ship CreateShip(string name, IEnumerable<Coordinates> coordinatesChain, Board board)
         {
             var ship = new Ship(name);
-            var shipCompoenents = coordinatesChain.Select(coordinates =>
+            var shipComponents = coordinatesChain.Select(coordinates =>
             {
                 var square = board.GetSquare(coordinates.X, coordinates.Y);
                 var shipComponent = new ShipComponent(ship, square);
                 square.ShipComponent = shipComponent;
                 return shipComponent;
             });
-            ship.AddComponents(shipCompoenents);
+            ship.AddComponents(shipComponents);
             return ship;
         }
 

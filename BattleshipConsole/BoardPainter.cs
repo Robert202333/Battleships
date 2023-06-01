@@ -12,7 +12,7 @@ public class BoardPainter : IBoardPainter
 
     }
 
-    public void OnSettingsChange(uint horizontalSize, uint verticalSize)
+    public void OnSettingsChange(int horizontalSize, int verticalSize)
     {
         // settings change not provide for console
     }
@@ -30,7 +30,7 @@ public class BoardPainter : IBoardPainter
     public void PaintAll(Board board, bool debugMode)
     {
         PaintHorizontalDescriptions(board);
-        for (uint i = 0; i < board.VerticalDescriptor.Size; i++)
+        for (int i = 0; i < board.VerticalDescriptor.Size; i++)
             PaintHoriontalLine(board, i);
         PaintHorizontalDescriptions(board);
         Console.WriteLine();
@@ -39,15 +39,15 @@ public class BoardPainter : IBoardPainter
     private void PaintHorizontalDescriptions(Board board)
     {
         PaintForamatted("");
-        for (uint i = 0; i < board.HorizontalDescriptor.Size; i++)
+        for (int i = 0; i < board.HorizontalDescriptor.Size; i++)
             PaintForamatted(board.HorizontalDescriptor.GetDescription(i));
         Console.WriteLine();
     }
 
-    private void PaintHoriontalLine(Board board, uint verticalIndex)
+    private void PaintHoriontalLine(Board board, int verticalIndex)
     {
         PaintForamatted(board.VerticalDescriptor.GetDescription(verticalIndex));
-        for (uint i = 0; i < board.HorizontalDescriptor.Size; i++)
+        for (int i = 0; i < board.HorizontalDescriptor.Size; i++)
             PaintSquare(board.GetSquare(i, verticalIndex));
         Console.WriteLine(board.VerticalDescriptor.GetDescription(verticalIndex));
     }
@@ -57,7 +57,7 @@ public class BoardPainter : IBoardPainter
         var mark = square.ShipComponent == null ?
             (square.WasHit ? missedShot : emptySquare) :
             (square.ShipComponent.WasHit ? 
-                square.ShipComponent.Ship.WassSunk ? componentSunk : componentHit :
+                square.ShipComponent.Ship.WasSunk ? componentSunk : componentHit :
                 emptySquare);
 
         PaintForametted(mark);

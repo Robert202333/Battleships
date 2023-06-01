@@ -28,7 +28,7 @@ namespace GameModel
 
         public string Name { get; init; }
 
-        public bool WassSunk
+        public bool WasSunk
         {
             get { return Components.All(component => component.WasHit); }
         }

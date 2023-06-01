@@ -5,9 +5,9 @@ VisualStudioVersion = 17.2.32516.85
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BattleshipsWPF", "Battleships\BattleshipsWPF.csproj", "{E636C5D5-97FF-4EB8-83E7-0CD201328BD2}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GameModel", "GameModel\GameModel.csproj", "{16ED0CC3-8577-4AFC-8989-48ADD69850E0}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GameModel", "GameModel\GameModel.csproj", "{16ED0CC3-8577-4AFC-8989-48ADD69850E0}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BattleshipConsole", "BattleshipConsole\BattleshipConsole.csproj", "{69FDD5AE-17A6-4650-8294-10D8A5851369}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BattleshipsConsole", "BattleshipConsole\BattleshipsConsole.csproj", "{69FDD5AE-17A6-4650-8294-10D8A5851369}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

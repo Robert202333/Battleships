@@ -47,21 +47,16 @@ namespace GameModel
         // UI doesn't provude any validation. Called after leaving settings dialog
         public void Validate()
         {
-            static int Clamp(int value, int min, int max)
-            {
-                return (value < min) ? min : (value > max) ? max : value;
-            }
-
-            HorizontalSize = Clamp(HorizontalSize, 5, 25);
-            VerticalSize = Clamp(VerticalSize, 5, 25);
+            HorizontalSize = Math.Clamp(HorizontalSize, 5, 25);
+            VerticalSize = Math.Clamp(VerticalSize, 5, 25);
 
             if (VerticalCoordinateDescriptionType == HorizontalCoordinateDescriptionType)
                 HorizontalCoordinateDescriptionType = 1 - VerticalCoordinateDescriptionType;
 
             ShipDescriptions.ForEach(shipDescription =>
             {
-                shipDescription.Size = Clamp(shipDescription.Size, 1, 10);
-                shipDescription.Count = Clamp(shipDescription.Count, 0, 20);
+                shipDescription.Size = Math.Clamp(shipDescription.Size, 1, 10);
+                shipDescription.Count = Math.Clamp(shipDescription.Count, 0, 20);
             });
         }
     }

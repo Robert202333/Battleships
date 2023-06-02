@@ -71,42 +71,6 @@ namespace GameModel.Tests
     internal class GameEnvTests
     {
         [Test]
-        public void ConvertToCoordinates()
-        {
-            // Standard game on 10x10 board, with 1 ship.
-            var gameEnv = new GameEnv(new TestGameCreator(), new TestMessageDisplayer());
-
-            var (xCoor, yCoor) = gameEnv.ConvertToCoordinates("A1");
-            Assert.AreEqual("A", xCoor);
-            Assert.AreEqual("1", yCoor);
-
-            (xCoor, yCoor) = gameEnv.ConvertToCoordinates("1A");
-            Assert.AreEqual("1", xCoor);
-            Assert.AreEqual("A", yCoor);
-
-            (xCoor, yCoor) = gameEnv.ConvertToCoordinates("11A");
-            Assert.AreEqual("11", xCoor);
-            Assert.AreEqual("A", yCoor);
-
-            (xCoor, yCoor) = gameEnv.ConvertToCoordinates("A11");
-            Assert.AreEqual("A", xCoor);
-            Assert.AreEqual("11", yCoor);
-
-            Assert.Throws<InvalidDescriptionException>(() => _ = gameEnv.ConvertToCoordinates(""));
-            Assert.Throws<InvalidDescriptionException>(() => _ = gameEnv.ConvertToCoordinates("A"));
-            Assert.Throws<InvalidDescriptionException>(() => _ = gameEnv.ConvertToCoordinates("AA"));
-            Assert.Throws<InvalidDescriptionException>(() => _ = gameEnv.ConvertToCoordinates("1"));
-            Assert.Throws<InvalidDescriptionException>(() => _ = gameEnv.ConvertToCoordinates("11"));
-            Assert.Throws<InvalidDescriptionException>(() => _ = gameEnv.ConvertToCoordinates("111A"));
-            Assert.Throws<InvalidDescriptionException>(() => _ = gameEnv.ConvertToCoordinates("A111"));
-            Assert.Throws<InvalidDescriptionException>(() => _ = gameEnv.ConvertToCoordinates("A1A"));
-            Assert.Throws<InvalidDescriptionException>(() => _ = gameEnv.ConvertToCoordinates("1AA"));
-            Assert.Throws<InvalidDescriptionException>(() => _ = gameEnv.ConvertToCoordinates("AA1"));
-            Assert.Throws<InvalidDescriptionException>(() => _ = gameEnv.ConvertToCoordinates("AA11"));
-            Assert.Throws<InvalidDescriptionException>(() => _ = gameEnv.ConvertToCoordinates("11AA"));
-        }
-
-        [Test]
         public void MessagesAndPainterTest()
         {
             // Standard game on 10x10 board, with 1 ship.

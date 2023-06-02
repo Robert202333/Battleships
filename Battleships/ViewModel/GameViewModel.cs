@@ -83,7 +83,7 @@ namespace Battleships
             bool shotCoordinatesAreValid = true;
             try
             {
-                gameEnv.ConvertToCoordinates(ShotCoordinates);
+                ShotCoordinates.ConvertToCoordinates();
             }
             catch
             {
@@ -104,7 +104,7 @@ namespace Battleships
 
         private void Shot()
         {
-            var (xCoor, yCoor) = gameEnv.ConvertToCoordinates(ShotCoordinates.ToUpper());
+            var (xCoor, yCoor) = ShotCoordinates.ToUpper().ConvertToCoordinates();
             if (gameEnv.ProcessShot(xCoor, yCoor))
                 StartNewGame();
         }

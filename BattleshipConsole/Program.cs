@@ -72,7 +72,7 @@ internal class ConsoleGame
     {
         try
         {
-            var (xCoor, yCoor) = gameEnv.ConvertToCoordinates(input);
+            var (xCoor, yCoor) = input.ConvertToCoordinates();
             if (gameEnv.ProcessShot(xCoor, yCoor))
                 gameEnv.Restart();
         }

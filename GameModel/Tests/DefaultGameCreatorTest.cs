@@ -73,10 +73,9 @@ namespace GameModel.Tests
             Dictionary<int, int> sizeToCountMap = new Dictionary<int, int>();
             chains.ForEach(chain =>
             {
-                if (sizeToCountMap.ContainsKey(chain.Chain.Count))
-                    sizeToCountMap[chain.Chain.Count] = sizeToCountMap[chain.Chain.Count] + 1;
-                else
-                    sizeToCountMap[chain.Chain.Count] = 1;
+                if (!sizeToCountMap.ContainsKey(chain.Chain.Count))
+                    sizeToCountMap[chain.Chain.Count] = 0;
+                sizeToCountMap[chain.Chain.Count]++;
             });
 
             settings.ShipDescriptions.ForEach(shipDefinition =>

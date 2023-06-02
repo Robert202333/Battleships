@@ -161,7 +161,7 @@ namespace GameModel
             }
         }
 
-        private bool IsSquareAvailable(in Coordinates coordinates)
+        private bool IsSquareAvailable(Coordinates coordinates)
         {
             return IsSquareAvailable(coordinates.X, coordinates.Y);
         }
@@ -171,7 +171,7 @@ namespace GameModel
             return board[y, x];
         }
 
-        private void SetSquareUnavailable(in Coordinates coor)
+        private void SetSquareUnavailable(Coordinates coor)
         {
             SetSquareUnavailable(coor.X, coor.Y);
         }
@@ -181,7 +181,7 @@ namespace GameModel
             board[y, x] = false;
         }
 
-        private void SetAllAdjacentSquaresUnavailable(in Coordinates coor)
+        private void SetAllAdjacentSquaresUnavailable(Coordinates coor)
         {
             for (int i = -1; i <= 1; i++)
             {
@@ -199,7 +199,7 @@ namespace GameModel
                 }
             }
         }
-        private bool AreCoordinatesValid(in Coordinates squareCoordinates)
+        private bool AreCoordinatesValid(Coordinates squareCoordinates)
         {
             return AreCoordinatesValid((int)squareCoordinates.X, (int)squareCoordinates.Y);
         }

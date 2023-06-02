@@ -253,7 +253,7 @@ namespace GameModel.Tests
         }
 
         [Test]
-        public void Execue()
+        public void Execute()
         {
             Task<int>[] tasks =
             {

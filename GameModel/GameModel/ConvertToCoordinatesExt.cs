@@ -1,21 +1,15 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace GameModel
+﻿namespace GameModel
 {
     public static class ConvertToCoordinatesExt
     {
-        public static Tuple<string, string> ConvertToCoordinates(this string input)
+        public static Tuple<string, string>? ConvertToCoordinates(this string input)
         {
             string coordinates = input.Trim();
             string xCoor = "";
             string yCoor = "";
 
             if (coordinates.Length < 2 || coordinates.Length > 3)
-                throw new InvalidDescriptionException();
+                return null;
 
             if (char.IsLetter(coordinates[0]))
             {
@@ -34,7 +28,7 @@ namespace GameModel
             if (xCoor.Length > 0 && yCoor.Length > 0 && xCoor.Length + yCoor.Length == coordinates.Length)
                 return Tuple.Create(xCoor, yCoor);
             else
-                throw new InvalidDescriptionException();
+                return null;
 
 
             // Reads up to 2 digit number

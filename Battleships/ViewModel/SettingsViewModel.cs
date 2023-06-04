@@ -1,22 +1,20 @@
-﻿using System;
+﻿using GameModel;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Globalization;
 using System.Linq;
 using System.Runtime.CompilerServices;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Data;
-using GameModel;
 
 namespace Battleships
 {
-    
+
     internal class SettingsViewModel : INotifyPropertyChanged
     {
         private Settings? settings;
-        public Settings? Settings 
-        { 
+        public Settings? Settings
+        {
             get { return settings; }
             set
             {
@@ -25,7 +23,7 @@ namespace Battleships
             }
         }
 
-        public List<CoordinateDescriptionType> CoordinateDescriptionTypes { get; } 
+        public List<CoordinateDescriptionType> CoordinateDescriptionTypes { get; }
             = Enum.GetValues(typeof(CoordinateDescriptionType)).Cast<CoordinateDescriptionType>().ToList();
 
         public SettingsViewModel()

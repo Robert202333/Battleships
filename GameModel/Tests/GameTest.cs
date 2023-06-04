@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using NUnit.Framework;
+﻿using NUnit.Framework;
 
 namespace GameModel.Tests
 {
@@ -21,7 +16,7 @@ namespace GameModel.Tests
             {
                 CreateShip("Sumbarine", coordinatesChain.Chain, board)
             };
-            
+
             return ships;
         }
     }
@@ -50,7 +45,9 @@ namespace GameModel.Tests
             Assert.Null(square.ShipComponent);
             Assert.True(square.WasHit);
 
-            Assert.Throws<RepeatedShotException>(() => _ = game.ProcessShot("A", "1"));
+            (square, result) = game.ProcessShot("A", "1");
+            Assert.AreEqual(result, ShotResult.Repeated);
+
 
             (square, result) = game.ProcessShot("B", "2");
             Assert.AreEqual(result, ShotResult.Hit);
@@ -64,7 +61,8 @@ namespace GameModel.Tests
             Assert.True(square.ShipComponent?.WasHit ?? false);
             Assert.False(square.ShipComponent?.Ship.WasSunk ?? true);
 
-            Assert.Throws<RepeatedShotException>(() => _ = game.ProcessShot("B", "2"));
+            (square, result) = game.ProcessShot("B", "2");
+            Assert.AreEqual(result, ShotResult.Repeated);
 
             (square, result) = game.ProcessShot("B", "4");
             Assert.True((result & ShotResult.Hit) != 0);

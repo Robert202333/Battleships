@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace GameModel
+﻿namespace GameModel
 {
 
     public class ShipComponent
@@ -35,7 +29,7 @@ namespace GameModel
 
         internal Ship(string name)
         {
-            Name = name;            
+            Name = name;
         }
 
         internal void AddComponents(IEnumerable<ShipComponent> components)

@@ -73,14 +73,14 @@ namespace GameModel.Tests
 
     [TestFixture]
     class CoordinatesChainTests
-    { 
+    {
         [Test]
         public void Includes()
         {
             CoordinatesChain chain = new CoordinatesChain();
             chain.Add(new Coordinates(3, 4));
             chain.Add(new Coordinates(3, 5));
-            
+
             Assert.True(chain.Includes(new Coordinates(3, 5)));
             Assert.False(chain.Includes(new Coordinates(3, 8)));
         }

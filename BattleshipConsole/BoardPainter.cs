@@ -56,7 +56,7 @@ public class BoardPainter : IBoardPainter
     {
         var mark = square.ShipComponent == null ?
             (square.WasHit ? missedShot : emptySquare) :
-            (square.ShipComponent.WasHit ? 
+            (square.ShipComponent.WasHit ?
                 square.ShipComponent.Ship.WasSunk ? componentSunk : componentHit :
                 emptySquare);
 

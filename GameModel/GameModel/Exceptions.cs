@@ -1,28 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace GameModel
+﻿namespace GameModel
 {
-    public class RepeatedShotException : Exception
-    {
-        const string message = "The same square hit again";
-        public RepeatedShotException() : base(message)
-        {
-        }
-    }
-
-    public class InvalidDescriptionException : Exception
-    {
-        public InvalidDescriptionException() : base()
-        {
-        }
-    }
-
     public class InvalidCoordinatesDescriptionException : Exception
-    {        
+    {
         public InvalidCoordinatesDescriptionException(string message) : base(message)
         {
         }

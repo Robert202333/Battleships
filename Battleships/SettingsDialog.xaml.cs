@@ -1,6 +1,5 @@
-﻿using System;
+﻿using GameModel;
 using System.Windows;
-using GameModel;
 
 namespace Battleships
 {

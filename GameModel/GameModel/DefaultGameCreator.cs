@@ -48,7 +48,7 @@ namespace GameModel
         };
     }
 
-    
+
     internal class ShipsCreator
     {
         private readonly Random random = new Random();
@@ -189,8 +189,8 @@ namespace GameModel
                 {
                     if (i == 0 && j == 0)
                         continue;
-                    int x = (int)coor.X + i;
-                    int y = (int)coor.Y + j;
+                    int x = coor.X + i;
+                    int y = coor.Y + j;
 
                     if (!AreCoordinatesValid(x, y))
                         continue;
@@ -209,7 +209,7 @@ namespace GameModel
             return x >= 0 && x < HorizontalSize && y >= 0 && y < VerticalSize;
         }
     }
-    
+
     internal class ShipCreationDatasProvider
     {
         private const int CreateShipTaskNum = 4;
@@ -236,10 +236,10 @@ namespace GameModel
                 CancellationTokenSource cancelSource = new CancellationTokenSource();
                 cancelSource.CancelAfter(CreationMaxTime * 1000);
 
-                Task<List<ShipCreationData>>[] tasks = 
+                Task<List<ShipCreationData>>[] tasks =
                     new Task<List<ShipCreationData>>[CreateShipTaskNum];
 
-                for(int i = 0; i < CreateShipTaskNum; i++)
+                for (int i = 0; i < CreateShipTaskNum; i++)
                     tasks[i] = new(() => CreateShipCreationDatas(cancelSource.Token));
 
                 foreach (var task in tasks)
@@ -266,11 +266,11 @@ namespace GameModel
 
     public class DefaultGameCreator : AbstractGameCreator
     {
-        public DefaultGameCreator() {}
+        public DefaultGameCreator() { }
 
         protected override IEnumerable<Ship> CreateShips(Board board, Settings settings)
         {
-            ShipCreationDatasProvider provider = new (settings);
+            ShipCreationDatasProvider provider = new(settings);
             var shipCreationDatas = provider.Execute();
 
             return shipCreationDatas.Select(shipCreationData =>

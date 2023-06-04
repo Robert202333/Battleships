@@ -1,11 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using Battleships.Painter;
+using GameModel;
+using System;
 using System.ComponentModel;
-using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Windows.Controls;
-using GameModel;
-using Battleships.Painter;
 
 
 namespace Battleships
@@ -80,16 +78,7 @@ namespace Battleships
 
         private bool ShotCcordinatesHaveValidFormat()
         {
-            bool shotCoordinatesAreValid = true;
-            try
-            {
-                ShotCoordinates.ConvertToCoordinates();
-            }
-            catch
-            {
-                shotCoordinatesAreValid = false;
-            }
-            return shotCoordinatesAreValid;
+            return ShotCoordinates.ConvertToCoordinates() != null;
         }
 
         private void Settings()
@@ -104,7 +93,7 @@ namespace Battleships
 
         private void Shot()
         {
-            var (xCoor, yCoor) = ShotCoordinates.ToUpper().ConvertToCoordinates();
+            var (xCoor, yCoor) = ShotCoordinates.ToUpper().ConvertToCoordinates()!;
             if (gameEnv.ProcessShot(xCoor, yCoor))
                 StartNewGame();
         }

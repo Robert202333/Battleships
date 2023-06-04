@@ -1,17 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace GameModel
+﻿namespace GameModel
 {
+    [Flags]
     public enum ShotResult
     {
         Miss = 1,
         Hit = 2,
         ShipSunk = 4,
-        GameEnd = 8
+        GameEnd = 8,
+        Repeated = 16
     }
 
     internal class Game
@@ -34,12 +30,12 @@ namespace GameModel
             var square = Board.GetSquare(coordinates.X, coordinates.Y);
 
             if (square.WasHit)
-                throw new RepeatedShotException();
+                return Tuple.Create(square, ShotResult.Repeated);
 
             square.WasHit = true;
 
             if (square.ShipComponent == null)
-                return new Tuple<Square, ShotResult>(square, ShotResult.Miss);
+                return Tuple.Create(square, ShotResult.Miss);
 
             square.ShipComponent.WasHit = true;
             ShotResult shotResult = ShotResult.Hit;
@@ -50,7 +46,7 @@ namespace GameModel
             if (AllShipsWereSunk())
                 shotResult |= ShotResult.GameEnd;
 
-            return new Tuple<Square, ShotResult>(square, shotResult);
+            return Tuple.Create(square, shotResult);
         }
 
 

@@ -46,7 +46,7 @@
     {
         public ShipComponent? ShipComponent { get; internal set; } = null;
         public bool WasHit { get; internal set; } = false;
-        public Coordinates Coordinates{ get; init; }
+        public Coordinates Coordinates { get; init; }
 
         internal Square(Coordinates coordinates)
         {
@@ -84,7 +84,7 @@
 
         internal Coordinates ConvertToCoordinates(string xDescription, string yDescription)
         {
-            return new Coordinates(HorizontalDescriptor.GetCoordinate(xDescription), 
+            return new Coordinates(HorizontalDescriptor.GetCoordinate(xDescription),
                                    VerticalDescriptor.GetCoordinate(yDescription));
         }
         public void VisitSquares(Action<Square, int, int> action, Predicate<Square>? predicate = null)

@@ -1,7 +1,8 @@
 ﻿
 // All classes are public to allow using them in custom GameCreator classes
 namespace GameModel
-{   public enum Direction
+{
+    public enum Direction
     {
         Up,
         Right,

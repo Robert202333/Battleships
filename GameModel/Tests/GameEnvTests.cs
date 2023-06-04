@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using NUnit.Framework;
+﻿using NUnit.Framework;
 
 namespace GameModel.Tests
 {
@@ -11,8 +6,8 @@ namespace GameModel.Tests
     internal class TestMessageDisplayer : IMessageDisplayer
     {
         internal string ExpectedType { get; set; } = "";
-        internal int ShowErrorCalls {get; set;}
-        internal int ShowWarningCalls {get; set;}
+        internal int ShowErrorCalls { get; set; }
+        internal int ShowWarningCalls { get; set; }
         internal int ShowInformationCalls { get; set; }
 
         public void ShowError(string type, string message)

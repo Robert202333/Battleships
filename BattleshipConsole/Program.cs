@@ -32,8 +32,8 @@ internal class ConsoleGame
     }
     internal void Run()
     {
-        while(!exit)
-        {   
+        while (!exit)
+        {
             string input = GetInput();
             string upperInput = input.ToUpper();
 
@@ -70,13 +70,13 @@ internal class ConsoleGame
 
     private void OnCoordinates(string input)
     {
-        try
+        Tuple<string, string>? coordinates = input.ConvertToCoordinates();
+        if (coordinates != null)
         {
-            var (xCoor, yCoor) = input.ConvertToCoordinates();
-            if (gameEnv.ProcessShot(xCoor, yCoor))
+            if (gameEnv.ProcessShot(coordinates.Item1, coordinates.Item2))
                 gameEnv.Restart();
         }
-        catch 
+        else
         {
             Console.WriteLine(invalidCoordinatesFormat);
         }

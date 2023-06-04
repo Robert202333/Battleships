@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace GameModel
+﻿namespace GameModel
 {
     public enum CoordinateDescriptionType
     {
@@ -27,7 +21,7 @@ namespace GameModel
         public CoordinateDescriptionType HorizontalCoordinateDescriptionType { get; set; } = CoordinateDescriptionType.Letter;
         public CoordinateDescriptionType VerticalCoordinateDescriptionType { get; set; } = CoordinateDescriptionType.Number;
 
-        public List<ShipDescription> ShipDescriptions { get; set; } = new ()
+        public List<ShipDescription> ShipDescriptions { get; set; } = new()
         {
             new () { Name = "Destroyer", Count = 2, Size = 2},
             new () { Name = "Submarine", Count = 1, Size = 3},

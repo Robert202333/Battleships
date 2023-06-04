@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using NUnit.Framework;
+﻿using NUnit.Framework;
 
 namespace GameModel.Tests
 {
@@ -19,7 +14,7 @@ namespace GameModel.Tests
                 Assert.True(coordinates.Y >= 0);
                 Assert.True(coordinates.Y < settings.VerticalSize);
             }
-            chains.ForEach(chain => chain.Chain.ForEach(coordinates => assertCoordinates(coordinates)));
+            chains.ForEach(chain => chain.Chain.ForEach(assertCoordinates));
         }
 
         private void AssertNotIntersect(List<CoordinatesChain> chains, Settings settings)
@@ -219,7 +214,7 @@ namespace GameModel.Tests
         const int GuardWaitingTimeNormal = 8; // 2 additional seconds as safety margin
         const int GuardWaitingTimeShort = 1; // checks if test works
 
-        private static int Guard(int seconds) 
+        private static int Guard(int seconds)
         {
             Thread.Sleep(seconds * 1000);
             return GuardResult;
@@ -244,7 +239,7 @@ namespace GameModel.Tests
             {
                 return DefaultGameCreatorInterruptedResult;
             }
-            catch(Exception)
+            catch (Exception)
             {
                 return DefaultGameCreatorErrorResult;
             }
@@ -293,7 +288,7 @@ namespace GameModel.Tests
                 new Task<int>(() => { return DefaultGameCreatorFun(4, 4, 1, 5); }) // ship too long
             };
 
-            foreach(var task in tasks)
+            foreach (var task in tasks)
                 task.Start();
 
             int finishedTaskIndex = Task.WaitAny(tasks);

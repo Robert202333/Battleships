@@ -12,8 +12,6 @@ namespace GameModel.Tests
 
         private CancellationTokenSource? cancellationTokentSource;
 
-        private Dictionary<CreateParameters, int> randomSeedsMap = new();
-
         private void AssertCoordinates(List<CoordinatesChain> chains, Settings settings)
         {
             void assertCoordinates(Coordinates coordinates)
@@ -98,14 +96,6 @@ namespace GameModel.Tests
             AssertNotStick(chains, settings);
         }
 
-        [OneTimeSetUp]
-        public void Init()
-        {
-            randomSeedsMap.Add(new CreateParameters(true, true), 12345);
-            randomSeedsMap.Add(new CreateParameters(true, false), 54321);
-            randomSeedsMap.Add(new CreateParameters(false, true), 12321);
-            randomSeedsMap.Add(new CreateParameters(false, false), 54345);
-        }
 
         [SetUp]
         public void InitTest()

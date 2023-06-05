@@ -61,12 +61,12 @@ namespace GameModel
 
         private readonly Settings settings;
 
-        internal ShipsCreator(Settings settings, CancellationToken cancellationToken, int randomSeed = 0)
+        internal ShipsCreator(Settings settings, CancellationToken cancellationToken, int? randomSeed = null)
         {
             this.settings = settings;
             this.cancellationToken = cancellationToken;
 
-            random = (randomSeed != 0) ? new Random(randomSeed) : new Random();
+            random = (randomSeed is not null) ? new Random((int)randomSeed) : new Random();
 
             board = new bool[VerticalSize, HorizontalSize];
             for (int y = 0; y < board.GetLength(0); y++)

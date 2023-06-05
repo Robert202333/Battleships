@@ -2,9 +2,18 @@
 
 namespace GameModel.Tests
 {
+    internal record struct CreateParameters(bool StraightShips, bool ShipsCanStick);
+
+
     [TestFixture]
     public class ShipsCreatorTest
     {
+        private Settings settings = new Settings();
+
+        private CancellationTokenSource? cancellationTokentSource;
+
+        private Dictionary<CreateParameters, int> randomSeedsMap = new();
+
         private void AssertCoordinates(List<CoordinatesChain> chains, Settings settings)
         {
             void assertCoordinates(Coordinates coordinates)
@@ -89,115 +98,53 @@ namespace GameModel.Tests
             AssertNotStick(chains, settings);
         }
 
-        [Test]
-        public void CreateStraightAndStick()
+        [OneTimeSetUp]
+        public void Init()
         {
-            CancellationTokenSource ctSource = new CancellationTokenSource();
-
-            Settings settings = new Settings();
-            settings.StraightShips = true;
-            settings.ShipsCanStick = true;
-
-            var shipsCraetor = new ShipsCreator(settings, ctSource.Token, 34543);
-            var result = shipsCraetor.Execute();
-            AssertChains(result.Select(shipCreationData => shipCreationData.Item1).ToList(), settings);
+            randomSeedsMap.Add(new CreateParameters(true, true), 12345);
+            randomSeedsMap.Add(new CreateParameters(true, false), 54321);
+            randomSeedsMap.Add(new CreateParameters(false, true), 12321);
+            randomSeedsMap.Add(new CreateParameters(false, false), 54345);
         }
 
-        [Test]
-        public void CreateStraight()
+        [SetUp]
+        public void InitTest()
         {
-            CancellationTokenSource ctSource = new CancellationTokenSource();
-
-            Settings settings = new Settings();
-            settings.StraightShips = true;
-            settings.ShipsCanStick = false;
-
-            var shipsCraetor = new ShipsCreator(settings, ctSource.Token, 54321);
-            var result = shipsCraetor.Execute();
-            AssertChains(result.Select(shipCreationData => shipCreationData.Item1).ToList(), settings);
+            cancellationTokentSource = new CancellationTokenSource();
         }
 
-        [Test]
-        public void CreateBent()
+        [TearDown]
+        public void FinishTest()
         {
-            CancellationTokenSource ctSource = new CancellationTokenSource();
-
-            Settings settings = new Settings();
-            settings.StraightShips = false;
-            settings.ShipsCanStick = false;
-
-            var shipsCraetor = new ShipsCreator(settings, ctSource.Token, 23432);
-            var result = shipsCraetor.Execute();
-            AssertChains(result.Select(shipCreationData => shipCreationData.Item1).ToList(), settings);
+            cancellationTokentSource!.Dispose();
         }
 
-        [Test]
-        public void CreateBentAndStick()
+        [TestCase(true, true, 12345, TestName = "Straight and can stick")]
+        [TestCase(true, false, 12321, TestName = "Straight and can't stick")]
+        [TestCase(false, true, 54321, TestName = "Bent and can stick")]
+        [TestCase(false, false, 54345, TestName = "Bent and can't stick")]
+        public void Create([Values] bool straightShips, [Values] bool shipsCanStiick, int randomSeed)
         {
-            CancellationTokenSource ctSource = new CancellationTokenSource();
+            settings.StraightShips = straightShips;
+            settings.ShipsCanStick = shipsCanStiick;
 
-            Settings settings = new Settings();
-            settings.StraightShips = false;
-            settings.ShipsCanStick = true;
-
-            var shipsCraetor = new ShipsCreator(settings, ctSource.Token, 12345);
+            var shipsCraetor = new ShipsCreator(settings, cancellationTokentSource!.Token, randomSeed);
             var result = shipsCraetor.Execute();
             AssertChains(result.Select(shipCreationData => shipCreationData.Item1).ToList(), settings);
         }
 
 
-        [Test]
-        public void CreateStraightAndStickRandom()
+
+        [TestCase(true, true, TestName = "Random Straight and can stick")]
+        [TestCase(true, false, TestName = "Random Straight and can't stick")]
+        [TestCase(false, true, TestName = "Random Bent and can stick")]
+        [TestCase(false, false, TestName = "Random Bent and can't stick")]
+        public void CreateRandom(bool straightShips, bool shipsCanStiick)
         {
-            CancellationTokenSource ctSource = new CancellationTokenSource();
+            settings.StraightShips = straightShips;
+            settings.ShipsCanStick = shipsCanStiick;
 
-            Settings settings = new Settings();
-            settings.StraightShips = true;
-            settings.ShipsCanStick = true;
-
-            var shipsCraetor = new ShipsCreator(settings, ctSource.Token);
-            var result = shipsCraetor.Execute();
-            AssertChains(result.Select(shipCreationData => shipCreationData.Item1).ToList(), settings);
-        }
-
-        [Test]
-        public void CreateStraightRandom()
-        {
-            CancellationTokenSource ctSource = new CancellationTokenSource();
-
-            Settings settings = new Settings();
-            settings.StraightShips = true;
-            settings.ShipsCanStick = false;
-
-            var shipsCraetor = new ShipsCreator(settings, ctSource.Token);
-            var result = shipsCraetor.Execute();
-            AssertChains(result.Select(shipCreationData => shipCreationData.Item1).ToList(), settings);
-        }
-
-        [Test]
-        public void CreateBentRandom()
-        {
-            CancellationTokenSource ctSource = new CancellationTokenSource();
-
-            Settings settings = new Settings();
-            settings.StraightShips = false;
-            settings.ShipsCanStick = false;
-
-            var shipsCraetor = new ShipsCreator(settings, ctSource.Token);
-            var result = shipsCraetor.Execute();
-            AssertChains(result.Select(shipCreationData => shipCreationData.Item1).ToList(), settings);
-        }
-
-        [Test]
-        public void CreateBentAndStickRandom()
-        {
-            CancellationTokenSource ctSource = new CancellationTokenSource();
-
-            Settings settings = new Settings();
-            settings.StraightShips = false;
-            settings.ShipsCanStick = true;
-
-            var shipsCraetor = new ShipsCreator(settings, ctSource.Token);
+            var shipsCraetor = new ShipsCreator(settings, cancellationTokentSource!.Token);
             var result = shipsCraetor.Execute();
             AssertChains(result.Select(shipCreationData => shipCreationData.Item1).ToList(), settings);
         }
@@ -246,69 +193,23 @@ namespace GameModel.Tests
             return DefaultGameCreatorNormalResult;
         }
 
-        [Test]
-        public void Execute()
+        [TestCase(GuardWaitingTimeNormal, 10, 10, 2, 2, DefaultGameCreatorNormalResult, TestName = "Create ships")]
+        [TestCase(GuardWaitingTimeNormal, 4, 4, 10, 1, DefaultGameCreatorInterruptedResult, TestName = "Interrupted when no available square")]
+        [TestCase(GuardWaitingTimeNormal, 4, 4, 1, 5, DefaultGameCreatorInterruptedResult, TestName = "interrupted when ship is too long")]
+        [TestCase(GuardWaitingTimeShort, 4, 4, 1, 5, GuardResult, TestName = "Interrupted too early")]
+        public void Execute(int guardTime, int horizontalBoardSize, int verticalBoardSize, int destroyerCount, int destroyerSize, int expectedResult)
         {
             Task<int>[] tasks =
             {
-                new Task<int>(() => { return Guard(GuardWaitingTimeNormal); }),
-                new Task<int>(() => { return DefaultGameCreatorFun(); })
+                new Task<int>(() => { return Guard(guardTime); }),
+                new Task<int>(() => { return DefaultGameCreatorFun(horizontalBoardSize, verticalBoardSize, destroyerCount, destroyerSize); })
             };
 
             foreach (var task in tasks)
                 task.Start();
 
             int finishedTaskIndex = Task.WaitAny(tasks);
-            Assert.AreEqual(DefaultGameCreatorNormalResult, tasks[finishedTaskIndex].Result);
-        }
-
-
-        [Test]
-        public void InterruptedWhenNoAvailableSquare()
-        {
-            Task<int>[] tasks =
-            {
-                new Task<int>(() => { return Guard(GuardWaitingTimeNormal); }),
-                new Task<int>(() => { return DefaultGameCreatorFun(4, 4, 10, 1); }) // too many ships
-            };
-
-            foreach (var task in tasks)
-                task.Start();
-
-            int finishedTaskIndex = Task.WaitAny(tasks);
-            Assert.AreEqual(DefaultGameCreatorInterruptedResult, tasks[finishedTaskIndex].Result);
-        }
-
-        [Test]
-        public void InterruptedWhenCanNotFinishShip()
-        {
-            Task<int>[] tasks =
-            {
-                new Task<int>(() => { return Guard(GuardWaitingTimeNormal); }),
-                new Task<int>(() => { return DefaultGameCreatorFun(4, 4, 1, 5); }) // ship too long
-            };
-
-            foreach (var task in tasks)
-                task.Start();
-
-            int finishedTaskIndex = Task.WaitAny(tasks);
-            Assert.AreEqual(DefaultGameCreatorInterruptedResult, tasks[finishedTaskIndex].Result);
-        }
-
-        [Test]
-        public void InterruptedTooEarly()
-        {
-            Task<int>[] tasks =
-            {
-                new Task<int>(() => { return Guard(GuardWaitingTimeShort); }),
-                new Task<int>(() => { return DefaultGameCreatorFun(4, 4, 1, 5); })
-            };
-
-            foreach (var task in tasks)
-                task.Start();
-
-            int finishedTaskIndex = Task.WaitAny(tasks);
-            Assert.AreEqual(GuardResult, tasks[finishedTaskIndex].Result);
+            Assert.AreEqual(expectedResult, tasks[finishedTaskIndex].Result);
         }
     }
 }

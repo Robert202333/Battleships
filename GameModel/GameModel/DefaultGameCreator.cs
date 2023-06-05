@@ -228,12 +228,12 @@ namespace GameModel
             if (debugCreationMode)
             {
                 // No multithread approach
-                CancellationTokenSource cancelSource = new CancellationTokenSource();
+                using CancellationTokenSource cancelSource = new CancellationTokenSource();
                 return CreateShipCreationDatas(cancelSource.Token);
             }
             else
             {
-                CancellationTokenSource cancelSource = new CancellationTokenSource();
+                using CancellationTokenSource cancelSource = new CancellationTokenSource();
                 cancelSource.CancelAfter(CreationMaxTime * 1000);
 
                 Task<List<ShipCreationData>>[] tasks =

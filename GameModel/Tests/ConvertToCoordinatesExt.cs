@@ -2,48 +2,29 @@
 
 namespace GameModel.Tests
 {
+    [TestFixture]
     public class ConvertToCoordinatesExt
     {
-        [Test]
-        public void ConvertToCoordinates()
+
+        [Test, Sequential]
+        public void ConvertToCoordinatesValid(
+            [Values("A1", "1A", "A11", "11A", "  A11  ")] string coordText,
+            [Values("A",  "1",  "A",   "11",  "A")] string expectedXCoor,
+            [Values("1",  "A",  "11",  "A",  "11")] string expectedYCoor)
         {
+            var (xCoor, yCoor) = coordText.ConvertToCoordinates()!;
+            Assert.AreEqual(expectedXCoor, xCoor);
+            Assert.AreEqual(expectedYCoor, yCoor);
 
-            var (xCoor, yCoor) = "A1".ConvertToCoordinates()!;
-            Assert.AreEqual("A", xCoor);
-            Assert.AreEqual("1", yCoor);
-
-            (xCoor, yCoor) = "1A".ConvertToCoordinates()!;
-            Assert.AreEqual("1", xCoor);
-            Assert.AreEqual("A", yCoor);
-
-            (xCoor, yCoor) = "11A".ConvertToCoordinates()!;
-            Assert.AreEqual("11", xCoor);
-            Assert.AreEqual("A", yCoor);
-
-            (xCoor, yCoor) = "A11".ConvertToCoordinates()!;
-            Assert.AreEqual("A", xCoor);
-            Assert.AreEqual("11", yCoor);
-
-            (xCoor, yCoor) = "  A11  ".ConvertToCoordinates()!;
-            Assert.AreEqual("A", xCoor);
-            Assert.AreEqual("11", yCoor);
-
-
-            Assert.Null("".ConvertToCoordinates());
-            Assert.Null("A".ConvertToCoordinates());
-            Assert.Null("AA".ConvertToCoordinates());
-            Assert.Null("A 1".ConvertToCoordinates());
-            Assert.Null("1".ConvertToCoordinates());
-            Assert.Null("11".ConvertToCoordinates());
-            Assert.Null("111A".ConvertToCoordinates());
-            Assert.Null("A111".ConvertToCoordinates());
-            Assert.Null("A1A".ConvertToCoordinates());
-            Assert.Null("1AA".ConvertToCoordinates());
-            Assert.Null("AA1".ConvertToCoordinates());
-            Assert.Null("AA11".ConvertToCoordinates());
-            Assert.Null("11AA".ConvertToCoordinates());
         }
 
+
+        [Test]
+        public void ConvertToCoordinatesInvalid([Values("", "A", "AA", "A 1", "1", "11", "111A", "A111", 
+                                                        "A1A", "1AA", "AA1", "AA11", "11AA")] string coord)
+        {
+            Assert.Null(coord.ConvertToCoordinates());
+        }
     }
 }
 
